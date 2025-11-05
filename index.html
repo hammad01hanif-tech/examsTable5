@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>نموذج اختبار تلاوة — 5 أو 10 أجزاء (متجاوب) مع نتيجة نجاح/رسوب</title>
+  <title>نموذج اختبارات التلاوة — 5/10 أجزاء & اختبار شهري (نفس التصميم)</title>
   <style>
     :root{
       --bg:#f7f9fc;
@@ -16,7 +16,6 @@
       --border:#e6e9ee;
       --shadow: 0 6px 22px rgba(10,10,10,0.06);
     }
-
     *{box-sizing:border-box}
     body{
       font-family: "Segoe UI", Tahoma, Arial, "Noto Naskh Arabic", sans-serif;
@@ -39,7 +38,7 @@
     h1{margin:0 0 10px 0;font-size:18px}
     .meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
     label{font-size:13px;color:var(--muted)}
-    input[type="text"], input[type="number"], select{
+    input[type="text"], input[type="number"], select, textarea{
       padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;
       background:#fff;
     }
@@ -82,9 +81,11 @@
       font-size:13px;
     }
 
+    .monthly-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+
     footer{margin-top:14px;font-size:13px;color:var(--muted)}
 
-    /* ====== تجاوُب للجوال ====== */
+    /* ====== تجاوب للجوال ====== */
     @media (max-width:900px) {
       table{min-width:0}
       thead{display:none}
@@ -113,11 +114,11 @@
         font-weight:600;
       }
       .q-controls{flex-direction:column;align-items:stretch;gap:8px}
-      .question-select, .position-select, input[type="text"], input[type="number"], select {
+      .question-select, .position-select, input[type="text"], input[type="number"], select, textarea {
         width:100%;
       }
       .count{width:100%;padding:8px}
-      .notes input{width:100%}
+      .notes input, .notes textarea{width:100%}
       .row-points{font-weight:700;color:var(--danger);font-size:16px}
       .controls{justify-content:space-between}
       .weights{display:flex;flex-wrap:wrap;gap:8px}
@@ -125,6 +126,7 @@
       .container{padding:12px}
       h1{font-size:16px}
       .q-number{margin-left:0;display:block;margin-bottom:6px}
+      .monthly-controls{flex-direction:column;align-items:stretch}
     }
 
     @media (max-width:420px){
@@ -138,12 +140,18 @@
 </head>
 <body>
   <div class="container">
-    <h1>نموذج تسجيل ملاحظات اختبار التلاوة</h1>
+    <h1>نموذج اختبارات التلاوة</h1>
 
     <div class="meta">
+      <!-- User requested: student first, then teacher -->
       <label>اسم الطالب:
         <input id="studentName" type="text" placeholder="اكتب اسم الطالب" />
       </label>
+
+      <label>اسم المعلم:
+        <input id="teacherName" type="text" placeholder="اكتب اسم المعلم" />
+      </label>
+
       <label>التاريخ:
         <input id="date" type="text" value="" />
       </label>
@@ -152,6 +160,7 @@
         <div class="mode-switch" aria-hidden="false">
           <button id="btn-5" class="mode-btn active">نموذج اختبار خمسة أجزاء</button>
           <button id="btn-10" class="mode-btn">نموذج اختبار عشرة أجزاء</button>
+          <button id="btn-monthly" class="mode-btn">نموذج الاختبار الشهري</button>
         </div>
 
         <div class="weights" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -165,9 +174,21 @@
       </div>
     </div>
 
+    <div id="monthlySettings" style="display:none;margin-bottom:8px">
+      <div class="monthly-controls">
+        <label>عدد أسئلة الاختبار الشهري:
+          <input id="monthlyCount" type="number" value="6" min="1" max="50" style="width:80px" />
+        </label>
+        <label>نسبة النجاح (%) للاختبار الشهري:
+          <input id="monthlyPassPct" type="number" value="60" min="0" max="100" style="width:80px" />
+        </label>
+        <button id="buildMonthlyBtn" class="small-btn">أنشئ نموذج شهري</button>
+      </div>
+    </div>
+
     <div class="table-wrap">
-      <table id="mainTable" aria-label="نموذج اختبار التلاوة" data-parts="5">
-        <thead>
+      <table id="mainTable" aria-label="نموذج اختبار التلاوة" data-parts="5" data-model="parts">
+        <thead id="tableHead">
           <tr>
             <th>رقم</th>
             <th>الجزء / السؤال</th>
@@ -181,7 +202,7 @@
           </tr>
         </thead>
         <tbody id="tableBody">
-          <!-- سيتم إنشاؤها ديناميكياً -->
+          <!-- يبنى ديناميكياً -->
         </tbody>
       </table>
     </div>
@@ -205,14 +226,18 @@
     </div>
 
     <footer>
-      الآن يظهر رقم السؤال بجانب كل صف، ويُحسب نجاح/رسوب تلقائياً حسب نوع النموذج (خمسة/عشرة أجزاء). عند التصدير يُضاف نوع النموذج وحالة النجاح/الرسوب في ملف CSV.
+      الآن: تم تعديل نموذج الاختبار الشهري ليستخدم نفس أعمدة الملاحظات (تنبيه/خطأ/تجويد/لحن جلي). يمكنك تحديد عدد الأسئلة ونسبة النجاح للاختبار الشهري. في جميع النماذج اسم الطالب يظهر أولاً ثم اسم المعلم. عند التصدير يُضاف نوع النموذج ونتيجة النجاح/الرسوب واسم المعلم.
     </footer>
   </div>
 
   <script>
-    // العناصر الأساسية
+    // عناصر
+    const studentNameEl = document.getElementById('studentName');
+    const teacherNameEl = document.getElementById('teacherName');
     const table = document.getElementById('mainTable');
     const tbody = document.getElementById('tableBody');
+    const tableHead = document.getElementById('tableHead');
+
     const wTanbih = document.getElementById('w-tanbih');
     const wKhata = document.getElementById('w-khata');
     const wTajweed = document.getElementById('w-tajweed');
@@ -231,9 +256,17 @@
 
     const btn5 = document.getElementById('btn-5');
     const btn10 = document.getElementById('btn-10');
-
+    const btnMonthly = document.getElementById('btn-monthly');
     const resetSavedBtn = document.getElementById('resetSaved');
 
+    const monthlySettings = document.getElementById('monthlySettings');
+    const monthlyCountEl = document.getElementById('monthlyCount');
+    const monthlyPassPctEl = document.getElementById('monthlyPassPct');
+    const buildMonthlyBtn = document.getElementById('buildMonthlyBtn');
+
+    document.getElementById('date').value = new Date().toLocaleDateString('ar-EG');
+
+    // بيانات افتراضية
     const DEFAULT_QUESTIONS = [
       "سورة الناس",
       "سورة الفلق",
@@ -241,7 +274,6 @@
       "سورة الفاتحة",
       "سورة الأحقاف"
     ];
-
     const DEFAULT_POSITIONS = {
       "سورة الناس": ["بداية الآية","منتصف الآية","نهاية الآية"],
       "سورة الفلق": ["أول آية","آية وسطى","آخر آية"],
@@ -250,7 +282,6 @@
       "سورة الأحقاف": ["بداية السورة","آية متوسطة","آية قريبة للنهاية"]
     };
 
-    // localStorage helpers
     function loadSaved(key, fallback) {
       try {
         const raw = localStorage.getItem(key);
@@ -261,19 +292,18 @@
       }
     }
     function save(key, value) {
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-      } catch(e) {}
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){}
     }
 
     let questions = loadSaved('quiz_questions', DEFAULT_QUESTIONS.slice());
     let positionsMap = loadSaved('quiz_positions', DEFAULT_POSITIONS);
 
-    // حالة النموذج الحالية
-    let partsCount = 5; // 5 أو 10
+    // الحالة الحالية
+    let modelType = 'parts'; // 'parts' أو 'monthly'
+    let partsCount = 5;
     let modelLabel = 'خمسة أجزاء';
 
-    // تنسيق رقم لعرض الكسور
+    // تنسيق رقم/كسور
     function fmt(n){
       const rounded = Math.round((parseFloat(n) + Number.EPSILON) * 100) / 100;
       const s = rounded.toString();
@@ -281,8 +311,8 @@
       return s.replace(/\.?0+$/,'').replace(/(\.\d)0$/,'$1');
     }
 
-    // دالة لإنشاء صف (DOM) ديناميكي
-    function createRow(index){
+    // إنشاء صف لنموذج الأجزاء (5/10) — نفس السابق
+    function createPartsRow(index){
       const tr = document.createElement('tr');
       tr.dataset.row = String(index);
       tr.innerHTML = `
@@ -309,61 +339,145 @@
       return tr;
     }
 
-    // بناء الجدول بعدد أجزاء محدد
-    function buildTable(n){
-      partsCount = n;
-      table.dataset.parts = String(n);
-      modelLabel = (n === 10) ? 'عشرة أجزاء' : 'خمسة أجزاء';
-      modelLabelEl.textContent = modelLabel;
-      // clear body
-      tbody.innerHTML = '';
-      for(let i=1;i<=n;i++){
-        tbody.appendChild(createRow(i));
-      }
-      initQuestionSelectors();
-      recalcAll();
-      // update active class
-      btn5.classList.toggle('active', n===5);
-      btn10.classList.toggle('active', n===10);
+    // إنشاء صف لنموذج الشهري بنفس تصميم الأعمدة (سؤال مفتوح + نفس أعمدة الملاحظات)
+    function createMonthlyRow(index){
+      const tr = document.createElement('tr');
+      tr.dataset.row = String(index);
+      tr.innerHTML = `
+        <td data-label="رقم" class="q-num-cell"><span class="q-number">${index}</span></td>
+        <td class="question" data-label="نص السؤال">
+          <textarea class="monthly-question-text" rows="2" placeholder="اكتب نص السؤال هنا"></textarea>
+        </td>
+        <td data-label="الموضع داخل الجزء">
+          <input class="monthly-position" type="text" placeholder="اختياري: موضع/مقطع" />
+        </td>
+        <td data-label="تنبيه (مرات)"><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
+        <td data-label="خطأ (مرات)"><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
+        <td data-label="تجويد (مرات)"><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
+        <td data-label="لحن جلي (مرات)"><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
+        <td class="notes" data-label="ملاحظات"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
+        <td class="row-points" data-label="نقاط مخصومة">0</td>
+      `;
+      return tr;
     }
 
-    // ملء قوائم الأسئلة والمواضع وتعيين الأزرار
+    // بناء جدول الأجزاء (5/10)
+    function buildPartsTable(n){
+      modelType = 'parts';
+      partsCount = n;
+      table.dataset.parts = String(n);
+      table.dataset.model = 'parts';
+      modelLabel = (n === 10) ? 'عشرة أجزاء' : 'خمسة أجزاء';
+      modelLabelEl.textContent = modelLabel;
+      monthlySettings.style.display = 'none';
+      // set header
+      tableHead.innerHTML = `
+        <tr>
+          <th>رقم</th>
+          <th>الجزء / السؤال</th>
+          <th>الموضع داخل الجزء</th>
+          <th>تنبيه (مرات)</th>
+          <th>خطأ (مرات)</th>
+          <th>تجويد (مرات)</th>
+          <th>لحن جلي (مرات)</th>
+          <th class="notes">ملاحظات</th>
+          <th>نقاط مخصومة</th>
+        </tr>
+      `;
+      tbody.innerHTML = '';
+      for(let i=1;i<=n;i++) tbody.appendChild(createPartsRow(i));
+      initQuestionSelectors();
+      recalcAll();
+      btn5.classList.toggle('active', n===5);
+      btn10.classList.toggle('active', n===10);
+      btnMonthly.classList.remove('active');
+    }
+
+    // بناء جدول الشهري بنفس أعمدة الملاحظات
+    function buildMonthlyTable(n){
+      modelType = 'monthly';
+      table.dataset.model = 'monthly';
+      modelLabel = 'الاختبار الشهري';
+      modelLabelEl.textContent = modelLabel;
+      monthlySettings.style.display = 'block';
+      tableHead.innerHTML = `
+        <tr>
+          <th>رقم</th>
+          <th>نص السؤال</th>
+          <th>الموضع (اختياري)</th>
+          <th>تنبيه (مرات)</th>
+          <th>خطأ (مرات)</th>
+          <th>تجويد (مرات)</th>
+          <th>لحن جلي (مرات)</th>
+          <th class="notes">ملاحظات</th>
+          <th>نقاط مخصومة</th>
+        </tr>
+      `;
+      tbody.innerHTML = '';
+      for(let i=1;i<=n;i++) tbody.appendChild(createMonthlyRow(i));
+      initMonthlyInputs(); // add listeners for monthly fields
+      recalcAll();
+      btn5.classList.remove('active');
+      btn10.classList.remove('active');
+      btnMonthly.classList.add('active');
+    }
+
+    // populate question selects and position selects for parts rows
+    function populateQuestionSelect(selectEl) {
+      const current = selectEl.value;
+      selectEl.innerHTML = '';
+      questions.forEach(q=>{
+        const opt = document.createElement('option'); opt.value = q; opt.textContent = q;
+        selectEl.appendChild(opt);
+      });
+      if(current && questions.includes(current)) selectEl.value = current;
+      else selectEl.value = questions[0] || '';
+    }
+    function populatePositionSelect(selectEl, questionName) {
+      selectEl.innerHTML = '';
+      const arr = positionsMap[questionName] || DEFAULT_POSITIONS[questionName] || [];
+      if(arr.length === 0){
+        const opt = document.createElement('option'); opt.value=''; opt.textContent='لا يوجد مواضع — اضغط ⚙ لإضافة';
+        selectEl.appendChild(opt); return;
+      }
+      arr.forEach(p=>{
+        const opt = document.createElement('option'); opt.value=p; opt.textContent=p;
+        selectEl.appendChild(opt);
+      });
+    }
+
     function initQuestionSelectors(){
       const rows = tbody.querySelectorAll('tr');
-      rows.forEach(row => {
+      rows.forEach(row=>{
         const qSelect = row.querySelector('.question-select');
+        if(!qSelect) return; // monthly rows don't have these selects
         const pSelect = row.querySelector('.position-select');
         const editQBtn = row.querySelector('.edit-question');
         const editPBtn = row.querySelector('.edit-positions');
 
         populateQuestionSelect(qSelect);
-
-        qSelect.addEventListener('change', () => {
+        qSelect.addEventListener('change', ()=>{
           populatePositionSelect(pSelect, qSelect.value);
           save('quiz_questions', questions);
           save('quiz_positions', positionsMap);
         });
 
-        editQBtn.addEventListener('click', () => {
+        editQBtn.addEventListener('click', ()=>{
           const current = qSelect.value || '';
           const txt = prompt('اكتب اسم السؤال/الجزء (سيُضاف للقائمة أو يغيّر الاسم الحالي):', current);
           if(txt === null) return;
-          const name = txt.trim();
-          if(!name) { alert('الاسم فارغ'); return; }
-          if(!questions.includes(name)) {
-            questions.push(name);
-          }
+          const name = txt.trim(); if(!name){ alert('الاسم فارغ'); return; }
+          if(!questions.includes(name)) questions.push(name);
           populateQuestionSelect(qSelect);
           qSelect.value = name;
           if(!positionsMap[name]) positionsMap[name] = ["موضع 1","موضع 2"];
           populatePositionSelect(pSelect, name);
-          save('quiz_questions', questions);
-          save('quiz_positions', positionsMap);
+          save('quiz_questions', questions); save('quiz_positions', positionsMap);
         });
 
         editPBtn.addEventListener('click', ()=>{
           const qName = qSelect.value;
-          if(!qName) { alert('اختر السؤال أولاً أو اضغط ✏️ لإدخال اسم السؤال'); return; }
+          if(!qName){ alert('اختر السؤال أولاً أو اضغط ✏️ لإدخال اسم السؤال'); return; }
           const existing = (positionsMap[qName] || []).join(', ');
           const input = prompt('أدخل المواضع مفصولة بفاصلة (، أو ,)', existing);
           if(input === null) return;
@@ -378,38 +492,21 @@
       });
     }
 
-    function populateQuestionSelect(selectEl) {
-      const current = selectEl.value;
-      selectEl.innerHTML = '';
-      questions.forEach(q=>{
-        const opt = document.createElement('option');
-        opt.value = q;
-        opt.textContent = q;
-        selectEl.appendChild(opt);
-      });
-      if(current && questions.includes(current)) selectEl.value = current;
-      else selectEl.value = questions[0] || '';
-    }
-
-    function populatePositionSelect(selectEl, questionName) {
-      selectEl.innerHTML = '';
-      const arr = positionsMap[questionName] || DEFAULT_POSITIONS[questionName] || [];
-      if(arr.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'لا يوجد مواضع — اضغط ⚙ لإضافة';
-        selectEl.appendChild(opt);
-        return;
-      }
-      arr.forEach(p=>{
-        const opt = document.createElement('option');
-        opt.value = p;
-        opt.textContent = p;
-        selectEl.appendChild(opt);
+    function initMonthlyInputs(){
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach(row=>{
+        // for monthly rows we just ensure count inputs react like parts
+        row.querySelectorAll('input.count, input[type="text"], textarea').forEach(inp=>{
+          inp.addEventListener('input', ()=> {
+            // clamp counts
+            if(inp.classList.contains('count') && parseInt(inp.value) < 0) inp.value = 0;
+            recalcAll();
+          });
+        });
       });
     }
 
-    // الحساب والمنطق الخاص بالنجاح/الرسوب
+    // الحسابات
     function getWeights(){
       return {
         tanbih: parseFloat(wTanbih.value) || 0,
@@ -419,95 +516,127 @@
       };
     }
 
-    function recalcRow(row){
+    function recalcPartsRow(row){
       const weights = getWeights();
       let points = 0;
       row.querySelectorAll('input.count').forEach(inp=>{
         const t = inp.dataset.type;
         const count = parseInt(inp.value) || 0;
-        if(t && weights[t] !== undefined && count > 0){
-          points += weights[t] * count;
-        }
+        if(t && weights[t] !== undefined && count > 0) points += weights[t] * count;
       });
       row.querySelector('.row-points').textContent = fmt(points);
       return points;
     }
 
-    function determinePassFail(finalPointsValue, maxScore, parts) {
-      // نحسب النسبة المئوية، وبناءً على نوع النموذج نطبق العتبة
+    function recalcMonthlyRow(row){
+      // same logic as parts: compute deductions for the question
+      return recalcPartsRow(row);
+    }
+
+    function determinePassFail(finalPointsValue, maxScore, model){
+      // percent of final relative to maxScore
       const percent = (maxScore > 0) ? (finalPointsValue / maxScore) * 100 : 0;
       let pass = true;
-      let threshold = 100; // default unreachable
-      if(parts === 5) threshold = 97.5;
-      else if(parts === 10) threshold = 95;
+      let threshold = 100;
+      if(model === 'parts'){
+        threshold = (partsCount === 5) ? 97.5 : 95;
+      } else if(model === 'monthly'){
+        threshold = parseFloat(monthlyPassPctEl.value) || 0;
+      }
       pass = (percent >= threshold);
       return { pass, percent, threshold };
     }
 
     function recalcAll(){
-      const rows = tbody.querySelectorAll('tr');
-      let totalTanbih=0, totalKhata=0, totalTajweed=0, totalLahn=0, totalPoints=0;
-      rows.forEach(r=>{
-        const tan = parseInt(r.querySelector('input[data-type="tanbih"]').value) || 0;
-        const kh = parseInt(r.querySelector('input[data-type="khata"]').value) || 0;
-        const tj = parseInt(r.querySelector('input[data-type="tajweed"]').value) || 0;
-        const ln = parseInt(r.querySelector('input[data-type="lahn"]').value) || 0;
+      if(modelType === 'parts'){
+        const rows = tbody.querySelectorAll('tr');
+        let totalTanbih=0, totalKhata=0, totalTajweed=0, totalLahn=0, totalPoints=0;
+        rows.forEach(r=>{
+          const tan = parseInt(r.querySelector('input[data-type="tanbih"]').value) || 0;
+          const kh = parseInt(r.querySelector('input[data-type="khata"]').value) || 0;
+          const tj = parseInt(r.querySelector('input[data-type="tajweed"]').value) || 0;
+          const ln = parseInt(r.querySelector('input[data-type="lahn"]').value) || 0;
+          totalTanbih += tan; totalKhata += kh; totalTajweed += tj; totalLahn += ln;
+          totalPoints += recalcPartsRow(r);
+        });
+        sumTanbih.textContent = totalTanbih;
+        sumKhata.textContent = totalKhata;
+        sumTajweed.textContent = totalTajweed;
+        sumLahn.textContent = totalLahn;
+        sumPoints.textContent = fmt(totalPoints);
 
-        totalTanbih += tan;
-        totalKhata += kh;
-        totalTajweed += tj;
-        totalLahn += ln;
+        const maxScore = parseFloat(maxScoreInput.value) || 100;
+        maxScoreDisplay.textContent = maxScore;
+        let final = maxScore - totalPoints; if(final < 0) final = 0;
+        finalScore.textContent = fmt(final);
 
-        totalPoints += recalcRow(r);
-      });
+        const res = determinePassFail(final, maxScore, 'parts');
+        showResultPill(res);
+      } else if(modelType === 'monthly'){
+        const rows = tbody.querySelectorAll('tr');
+        let totalPoints = 0;
+        rows.forEach(r=>{
+          totalPoints += recalcMonthlyRow(r);
+        });
+        sumTanbih.textContent = '-';
+        sumKhata.textContent = '-';
+        sumTajweed.textContent = '-';
+        sumLahn.textContent = '-';
+        sumPoints.textContent = fmt(totalPoints);
 
-      sumTanbih.textContent = totalTanbih;
-      sumKhata.textContent = totalKhata;
-      sumTajweed.textContent = totalTajweed;
-      sumLahn.textContent = totalLahn;
-      sumPoints.textContent = fmt(totalPoints);
+        const maxScore = parseFloat(maxScoreInput.value) || 100;
+        maxScoreDisplay.textContent = maxScore;
+        let final = maxScore - totalPoints; if(final < 0) final = 0;
+        finalScore.textContent = fmt(final);
 
-      const maxScore = parseFloat(maxScoreInput.value) || 100;
-      maxScoreDisplay.textContent = maxScore;
-      let final = maxScore - totalPoints;
-      if(final < 0) final = 0;
-      finalScore.textContent = fmt(final);
-
-      // تحديد ناجح/راسب
-      const parts = partsCount;
-      const res = determinePassFail(final, maxScore, parts);
-      // عرض النتيجة في الواجهة
-      if(res.pass){
-        resultPill.style.display = 'inline-block';
-        resultPill.classList.remove('fail');
-        resultPill.classList.add('pass');
-        resultPill.textContent = `النتيجة: ناجح — (${fmt(res.percent)}%)`;
-      } else {
-        resultPill.style.display = 'inline-block';
-        resultPill.classList.remove('pass');
-        resultPill.classList.add('fail');
-        resultPill.textContent = `النتيجة: راسب — (${fmt(res.percent)}%) — الحد الأدنى للنجاح ${res.threshold}%`;
+        const res = determinePassFail(final, maxScore, 'monthly');
+        showResultPill(res);
       }
     }
 
-    // أحداث عامة
+    function showResultPill(res){
+      if(res.pass){
+        resultPill.style.display = 'inline-block';
+        resultPill.classList.remove('fail'); resultPill.classList.add('pass');
+        resultPill.textContent = `النتيجة: ناجح — (${fmt(res.percent)}%)`;
+      } else {
+        resultPill.style.display = 'inline-block';
+        resultPill.classList.remove('pass'); resultPill.classList.add('fail');
+        resultPill.textContent = `النتيجة: راسب — (${fmt(res.percent)}%) — حد النجاح ${res.threshold}%`;
+      }
+    }
+
+    // أحداث
     tbody.addEventListener('input', (e)=>{
       if(e.target && e.target.classList.contains('count')) {
         if(parseInt(e.target.value) < 0) e.target.value = 0;
         recalcAll();
+      } else {
+        // other inputs that affect calculation
+        recalcAll();
       }
     });
 
-    [wTanbih,wKhata,wTajweed,wLahn,maxScoreInput].forEach(el=>{
+    [wTanbih,wKhata,wTajweed,wLahn,maxScoreInput, monthlyPassPctEl].forEach(el=>{
+      if(!el) return;
       el.addEventListener('input', ()=> recalcAll());
     });
 
     document.getElementById('recalc').addEventListener('click', ()=> recalcAll());
+
     document.getElementById('clearAll').addEventListener('click', ()=>{
       if(!confirm('هل تود إعادة تعيين كل القيم والملاحظات للبدء من جديد؟')) return;
-      tbody.querySelectorAll('input.count').forEach(c=>c.value = 0);
-      tbody.querySelectorAll('input[type="text"]').forEach(t=>t.value = '');
-      tbody.querySelectorAll('.row-points').forEach(r=>r.textContent='0');
+      if(modelType === 'parts'){
+        tbody.querySelectorAll('input.count').forEach(c=>c.value = 0);
+        tbody.querySelectorAll('input[type="text"]').forEach(t=>t.value = '');
+        tbody.querySelectorAll('.row-points').forEach(r=>r.textContent='0');
+      } else {
+        tbody.querySelectorAll('input.count').forEach(c=>c.value = 0);
+        tbody.querySelectorAll('.monthly-question-text').forEach(t=>t.value = '');
+        tbody.querySelectorAll('.monthly-position').forEach(p=>p.value = '');
+        tbody.querySelectorAll('input[type="text"]').forEach(t=>t.value = '');
+        tbody.querySelectorAll('.row-points').forEach(r=>r.textContent='0');
+      }
       recalcAll();
     });
 
@@ -518,54 +647,90 @@
       location.reload();
     });
 
-    // التبديل بين 5 و 10 أجزاء
-    btn5.addEventListener('click', ()=> buildTable(5));
-    btn10.addEventListener('click', ()=> buildTable(10));
+    // التبديل بين النماذج
+    btn5.addEventListener('click', ()=> { buildPartsTable(5); });
+    btn10.addEventListener('click', ()=> { buildPartsTable(10); });
+    btnMonthly.addEventListener('click', ()=> {
+      monthlySettings.style.display = 'block';
+      // build monthly using count value
+      buildMonthlyTable(parseInt(monthlyCountEl.value) || 6);
+    });
 
-    // التصدير إلى CSV يشمل "نوع النموذج" و "النتيجة"
+    buildMonthlyBtn.addEventListener('click', ()=>{
+      const n = parseInt(monthlyCountEl.value) || 1;
+      buildMonthlyTable(n);
+    });
+
+    // التصدير CSV مع BOM، واسم الطالب أولاً ثم اسم المعلم، وإضافة حالة النجاح/الرسوب
     document.getElementById('exportCsv').addEventListener('click', ()=>{
-      const rows = tbody.querySelectorAll('tr');
-      const headers = ['الجزء','السؤال','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة'];
-      const data = [headers];
-      rows.forEach(r=>{
-        const part = r.dataset.row || '';
-        const q = r.querySelector('.question-select').value || '';
-        const pos = r.querySelector('.position-select').value || '';
-        const t = r.querySelector('input[data-type="tanbih"]').value || '0';
-        const k = r.querySelector('input[data-type="khata"]').value || '0';
-        const tj = r.querySelector('input[data-type="tajweed"]').value || '0';
-        const l = r.querySelector('input[data-type="lahn"]').value || '0';
-        const note = r.querySelector('.notes input').value.replace(/"/g,'""');
-        const pts = r.querySelector('.row-points').textContent;
-        data.push([part,q,pos,t,k,tj,l, note, pts]);
-      });
-
-      const student = document.getElementById('studentName').value || '---';
-      const date = document.getElementById('date').value || '---';
-      const modelRow = ['نوع_النموذج', modelLabel];
-      // إعادة حساب للتأكد
       recalcAll();
-      // حساب النتيجة النهائية والنجاح
-      const maxScore = parseFloat(maxScoreInput.value) || 100;
-      const final = parseFloat(finalScore.textContent) || 0;
-      const passInfo = determinePassFail(final, maxScore, partsCount);
-      const resultText = passInfo.pass ? 'ناجح' : 'راسب';
-      const resultPercent = fmt(passInfo.percent);
-
-      // تركيب ملف CSV مع BOM لحل مشكلة Excel
       const out = [];
-      out.push(['اسم_الطالب', student, 'التاريخ', date]);
+      const student = studentNameEl.value || '---';
+      const teacher = teacherNameEl.value || '---';
+      const date = document.getElementById('date').value || '---';
+      let resultText = '---', resultPercent = '0';
+      if(modelType === 'parts'){
+        const maxScore = parseFloat(maxScoreInput.value) || 100;
+        const finals = parseFloat(finalScore.textContent) || 0;
+        const res = determinePassFail(finals, maxScore, 'parts');
+        resultText = res.pass ? 'ناجح' : 'راسب'; resultPercent = fmt(res.percent);
+      } else {
+        const finals = parseFloat(finalScore.textContent) || 0;
+        const maxScore = parseFloat(maxScoreInput.value) || 100;
+        const res = determinePassFail(finals, maxScore, 'monthly');
+        resultText = res.pass ? 'ناجح' : 'راسب'; resultPercent = fmt(res.percent);
+      }
+
+      // header info: student first, then teacher
+      out.push(['اسم_الطالب', student, 'اسم_المعلم', teacher, 'التاريخ', date]);
       out.push(['نوع_النموذج', modelLabel]);
       out.push(['النتيجة', resultText, 'النسبة_%', resultPercent]);
       out.push([]);
-      out.push(headers);
-      data.slice(1).forEach(r=> out.push(r)); // تفاصيل الصفوف
-      out.push([]);
-      out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
-      out.push(['','', '', sumTanbih.textContent, sumKhata.textContent, sumTajweed.textContent, sumLahn.textContent, '', sumPoints.textContent]);
-      out.push(['الدرجة_النهائية', finalScore.textContent + ' / ' + maxScoreInput.value]);
 
-      // استعمل الفاصلة كفاصل، ونضيف BOM في بداية الملف
+      if(modelType === 'parts'){
+        const headers = ['الجزء','السؤال','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة'];
+        out.push(headers);
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(r=>{
+          const part = r.dataset.row || '';
+          const q = r.querySelector('.question-select') ? r.querySelector('.question-select').value : '';
+          const pos = r.querySelector('.position-select') ? r.querySelector('.position-select').value : '';
+          const t = r.querySelector('input[data-type="tanbih"]').value || '0';
+          const k = r.querySelector('input[data-type="khata"]').value || '0';
+          const tj = r.querySelector('input[data-type="tajweed"]').value || '0';
+          const l = r.querySelector('input[data-type="lahn"]').value || '0';
+          const note = r.querySelector('.notes input').value.replace(/"/g,'""');
+          const pts = r.querySelector('.row-points').textContent;
+          out.push([part,q,pos,t,k,tj,l,note,pts]);
+        });
+        out.push([]);
+        out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
+        out.push(['','', '', sumTanbih.textContent, sumKhata.textContent, sumTajweed.textContent, sumLahn.textContent, '', sumPoints.textContent]);
+        out.push(['الدرجة_النهائية', finalScore.textContent + ' / ' + maxScoreInput.value]);
+      } else {
+        const headers = ['رقم','نص_السؤال','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة'];
+        out.push(headers);
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(r=>{
+          const idx = r.dataset.row || '';
+          const qtext = r.querySelector('.monthly-question-text') ? r.querySelector('.monthly-question-text').value.replace(/"/g,'""') : '';
+          const pos = r.querySelector('.monthly-position') ? r.querySelector('.monthly-position').value.replace(/"/g,'""') : '';
+          const t = r.querySelector('input[data-type="tanbih"]').value || '0';
+          const k = r.querySelector('input[data-type="khata"]').value || '0';
+          const tj = r.querySelector('input[data-type="tajweed"]').value || '0';
+          const l = r.querySelector('input[data-type="lahn"]').value || '0';
+          const note = r.querySelector('.notes input').value.replace(/"/g,'""');
+          const pts = r.querySelector('.row-points').textContent;
+          out.push([idx, qtext, pos, t,k,tj,l,note,pts]);
+        });
+        out.push([]);
+        out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
+        out.push(['','', '', sumTanbih.textContent, sumKhata.textContent, sumTajweed.textContent, sumLahn.textContent, '', sumPoints.textContent]);
+        out.push(['الدرجة_النهائية', finalScore.textContent + ' / ' + maxScoreInput.value]);
+        out.push(['نسبة_النجاح_المحددة', monthlyPassPctEl.value || '']);
+      }
+
+      // بناء CSV مع BOM لتوافق Excel
       const sep = ',';
       const csv = out.map(r=>{
         return r.map(cell=>{
@@ -580,32 +745,33 @@
       const blob = new Blob([csvWithBOM], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
+      const fileSuffix = modelLabel.replace(/\s+/g,'_');
       a.href = url;
-      a.download = (student ? student.replace(/\s+/g,'_') : 'student') + `_${modelLabel.replace(/\s+/g,'_')}_results.csv`;
+      a.download = (student ? student.replace(/\s+/g,'_') : 'student') + `_${fileSuffix}_results.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
     });
 
-    // تهيئة التاريخ عند الفتح
-    document.getElementById('date').value = new Date().toLocaleDateString('ar-EG');
-
-    // bootstrap: بناء الافتراضي (يفترض 5)
+    // bootstrap initial
     (function bootstrap(){
-      // تأكد وجود مواضع لأي سؤال مذكور في القائمة
+      // ensure positions exist for questions
       questions.forEach(q=>{
-        if(!positionsMap[q]) {
-          positionsMap[q] = positionsMap[q] || DEFAULT_POSITIONS[q] || ["موضع 1"];
-        }
+        if(!positionsMap[q]) positionsMap[q] = DEFAULT_POSITIONS[q] || ["موضع 1"];
       });
       save('quiz_questions', questions);
       save('quiz_positions', positionsMap);
 
-      // إنشئ الجدول بعدد الأجزاء الافتراضي (5)
+      // default build 5 parts (or read from URL ?parts=10)
       const urlParams = new URLSearchParams(location.search);
       const p = parseInt(urlParams.get('parts')) || 5;
-      buildTable((p === 10) ? 10 : 5);
+      buildPartsTable((p === 10) ? 10 : 5);
+
+      // save last teacher optionally
+      const lastTeacher = loadSaved('last_teacher', '');
+      if(lastTeacher) teacherNameEl.value = lastTeacher;
+      teacherNameEl.addEventListener('input', ()=> save('last_teacher', teacherNameEl.value));
     })();
   </script>
 </body>
