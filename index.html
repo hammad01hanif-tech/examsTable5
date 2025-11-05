@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>نموذج اختبار تلاوة — 5 أو 10 أجزاء (متجاوب)</title>
+  <title>نموذج اختبار تلاوة — 5 أو 10 أجزاء (متجاوب) مع نتيجة نجاح/رسوب</title>
   <style>
     :root{
       --bg:#f7f9fc;
@@ -61,11 +61,26 @@
     .btn.secondary{background:#6c757d}
     .summary{margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
     .pill{background:#f8fafc;padding:8px 10px;border-radius:10px;border:1px solid #eef3ff;font-size:14px}
+    .pill.result{font-weight:700;padding:10px 12px;border-radius:10px}
+    .pill.result.pass{background:#e6f8ee;border-color:#d1f0db;color:var(--success)}
+    .pill.result.fail{background:#fff1f0;border-color:#ffd6d1;color:var(--danger)}
     .count{width:64px;padding:6px;text-align:center;border-radius:8px}
     .small-btn{background:var(--btn-bg);border:1px solid #d7e7ff;padding:6px 8px;border-radius:8px;cursor:pointer;margin-left:6px}
     .q-controls{display:flex;gap:6px;align-items:center;justify-content:flex-end}
     .question-select{min-width:160px;padding:8px;border-radius:8px}
     .position-select{min-width:140px;padding:8px;border-radius:8px}
+    .q-number{
+      display:inline-block;
+      min-width:36px;
+      text-align:center;
+      padding:6px 8px;
+      border-radius:8px;
+      background:#f1f5fa;
+      color:#0b2f66;
+      font-weight:700;
+      margin-left:8px;
+      font-size:13px;
+    }
 
     footer{margin-top:14px;font-size:13px;color:var(--muted)}
 
@@ -109,6 +124,7 @@
       .meta{flex-direction:column;align-items:stretch}
       .container{padding:12px}
       h1{font-size:16px}
+      .q-number{margin-left:0;display:block;margin-bottom:6px}
     }
 
     @media (max-width:420px){
@@ -153,6 +169,7 @@
       <table id="mainTable" aria-label="نموذج اختبار التلاوة" data-parts="5">
         <thead>
           <tr>
+            <th>رقم</th>
             <th>الجزء / السؤال</th>
             <th>الموضع داخل الجزء</th>
             <th>تنبيه (مرات)</th>
@@ -184,10 +201,11 @@
       <div class="pill">إجمالي اللحن الجلي: <span id="sum-lahn">0</span></div>
       <div class="pill">مجموع النقاط المخصومة: <span id="sum-points">0</span></div>
       <div class="pill">الدرجة النهائية: <span id="final-score">0</span> / <span id="maxScoreDisplay">100</span></div>
+      <div id="resultPill" class="pill result" style="display:none"></div>
     </div>
 
     <footer>
-      اضغط زر "نموذج اختبار عشرة أجزاء" لتبديل النموذج. عند التصدير يُدرج نوع النموذج (خمسة/عشرة أجزاء) في ملف CSV.
+      الآن يظهر رقم السؤال بجانب كل صف، ويُحسب نجاح/رسوب تلقائياً حسب نوع النموذج (خمسة/عشرة أجزاء). عند التصدير يُضاف نوع النموذج وحالة النجاح/الرسوب في ملف CSV.
     </footer>
   </div>
 
@@ -209,6 +227,7 @@
     const sumPoints = document.getElementById('sum-points');
     const finalScore = document.getElementById('final-score');
     const modelLabelEl = document.getElementById('modelLabel');
+    const resultPill = document.getElementById('resultPill');
 
     const btn5 = document.getElementById('btn-5');
     const btn10 = document.getElementById('btn-10');
@@ -267,6 +286,7 @@
       const tr = document.createElement('tr');
       tr.dataset.row = String(index);
       tr.innerHTML = `
+        <td data-label="رقم" class="q-num-cell"><span class="q-number">${index}</span></td>
         <td class="question" data-label="الجزء / السؤال">
           <div class="q-controls">
             <select class="question-select" aria-label="اختر السؤال"></select>
@@ -389,7 +409,7 @@
       });
     }
 
-    // الحساب
+    // الحساب والمنطق الخاص بالنجاح/الرسوب
     function getWeights(){
       return {
         tanbih: parseFloat(wTanbih.value) || 0,
@@ -411,6 +431,17 @@
       });
       row.querySelector('.row-points').textContent = fmt(points);
       return points;
+    }
+
+    function determinePassFail(finalPointsValue, maxScore, parts) {
+      // نحسب النسبة المئوية، وبناءً على نوع النموذج نطبق العتبة
+      const percent = (maxScore > 0) ? (finalPointsValue / maxScore) * 100 : 0;
+      let pass = true;
+      let threshold = 100; // default unreachable
+      if(parts === 5) threshold = 97.5;
+      else if(parts === 10) threshold = 95;
+      pass = (percent >= threshold);
+      return { pass, percent, threshold };
     }
 
     function recalcAll(){
@@ -441,6 +472,22 @@
       let final = maxScore - totalPoints;
       if(final < 0) final = 0;
       finalScore.textContent = fmt(final);
+
+      // تحديد ناجح/راسب
+      const parts = partsCount;
+      const res = determinePassFail(final, maxScore, parts);
+      // عرض النتيجة في الواجهة
+      if(res.pass){
+        resultPill.style.display = 'inline-block';
+        resultPill.classList.remove('fail');
+        resultPill.classList.add('pass');
+        resultPill.textContent = `النتيجة: ناجح — (${fmt(res.percent)}%)`;
+      } else {
+        resultPill.style.display = 'inline-block';
+        resultPill.classList.remove('pass');
+        resultPill.classList.add('fail');
+        resultPill.textContent = `النتيجة: راسب — (${fmt(res.percent)}%) — الحد الأدنى للنجاح ${res.threshold}%`;
+      }
     }
 
     // أحداث عامة
@@ -475,7 +522,7 @@
     btn5.addEventListener('click', ()=> buildTable(5));
     btn10.addEventListener('click', ()=> buildTable(10));
 
-    // التصدير إلى CSV يشمل "نوع النموذج"
+    // التصدير إلى CSV يشمل "نوع النموذج" و "النتيجة"
     document.getElementById('exportCsv').addEventListener('click', ()=>{
       const rows = tbody.querySelectorAll('tr');
       const headers = ['الجزء','السؤال','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة'];
@@ -495,32 +542,42 @@
 
       const student = document.getElementById('studentName').value || '---';
       const date = document.getElementById('date').value || '---';
-      // إضافة رأس للموديل (نوع النموذج) قبل البيانات التفصيلية
       const modelRow = ['نوع_النموذج', modelLabel];
-      const totalsRow = ['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط'];
-      const totalsVals = ['', '', '', sumTanbih.textContent, sumKhata.textContent, sumTajweed.textContent, sumLahn.textContent, '', sumPoints.textContent];
+      // إعادة حساب للتأكد
+      recalcAll();
+      // حساب النتيجة النهائية والنجاح
+      const maxScore = parseFloat(maxScoreInput.value) || 100;
+      const final = parseFloat(finalScore.textContent) || 0;
+      const passInfo = determinePassFail(final, maxScore, partsCount);
+      const resultText = passInfo.pass ? 'ناجح' : 'راسب';
+      const resultPercent = fmt(passInfo.percent);
 
+      // تركيب ملف CSV مع BOM لحل مشكلة Excel
       const out = [];
       out.push(['اسم_الطالب', student, 'التاريخ', date]);
-      out.push(modelRow);
+      out.push(['نوع_النموذج', modelLabel]);
+      out.push(['النتيجة', resultText, 'النسبة_%', resultPercent]);
       out.push([]);
       out.push(headers);
       data.slice(1).forEach(r=> out.push(r)); // تفاصيل الصفوف
       out.push([]);
-      out.push(totalsRow);
-      out.push(totalsVals);
+      out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
+      out.push(['','', '', sumTanbih.textContent, sumKhata.textContent, sumTajweed.textContent, sumLahn.textContent, '', sumPoints.textContent]);
       out.push(['الدرجة_النهائية', finalScore.textContent + ' / ' + maxScoreInput.value]);
 
+      // استعمل الفاصلة كفاصل، ونضيف BOM في بداية الملف
+      const sep = ',';
       const csv = out.map(r=>{
         return r.map(cell=>{
           if(cell===undefined || cell===null) return '';
           const s = String(cell);
-          if(s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
+          if(s.includes(sep) || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
           return s;
-        }).join(',');
+        }).join(sep);
       }).join('\n');
 
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const csvWithBOM = '\uFEFF' + csv;
+      const blob = new Blob([csvWithBOM], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -546,7 +603,6 @@
       save('quiz_positions', positionsMap);
 
       // إنشئ الجدول بعدد الأجزاء الافتراضي (5)
-      // إذا المستخدم فتح الرابط مع ?parts=10 نقرأه
       const urlParams = new URLSearchParams(location.search);
       const p = parseInt(urlParams.get('parts')) || 5;
       buildTable((p === 10) ? 10 : 5);
