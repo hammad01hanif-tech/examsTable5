@@ -3,65 +3,129 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>نموذج اختبار تلاوة - قابل لإضافة الأسئلة والمواضع</title>
+  <title>نموذج اختبار تلاوة — واجهة متجاوبة للجوال</title>
   <style>
     :root{
       --bg:#f7f9fc;
       --card:#ffffff;
       --accent:#0b74de;
-      --muted:#666;
+      --muted:#6b7280;
       --danger:#d9534f;
       --success:#28a745;
       --btn-bg:#eef5ff;
+      --border:#e6e9ee;
+      --shadow: 0 6px 22px rgba(10,10,10,0.06);
     }
+
+    /* قاعدة الصفحة */
+    *{box-sizing:border-box}
     body{
       font-family: "Segoe UI", Tahoma, Arial, "Noto Naskh Arabic", sans-serif;
       background:var(--bg);
-      margin:20px;
-      color:#111;
+      margin:0;
+      color:#111827;
+      direction:rtl;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:16px;
     }
     .container{
       max-width:980px;
-      margin:0 auto;
+      margin:12px auto;
       background:var(--card);
-      padding:18px;
-      border-radius:8px;
-      box-shadow:0 6px 22px rgba(10,10,10,0.06);
+      padding:16px;
+      border-radius:10px;
+      box-shadow:var(--shadow);
     }
-    h1{margin:0 0 10px 0;font-size:20px}
+    h1{margin:0 0 10px 0;font-size:18px}
     .meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-    label{font-size:14px;color:var(--muted)}
+    label{font-size:13px;color:var(--muted)}
     input[type="text"], input[type="number"], select{
-      padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:14px;
-      direction:ltr;
+      padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;
+      background:#fff;
     }
-    table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{border:1px solid #e6e9ee;padding:8px;text-align:center;font-size:14px}
-    th{background:#f3f6fb;color:#222}
-    td.question{text-align:right;direction:rtl;min-width:220px}
+    .weights input{width:84px}
+    .weights label{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+
+    /* جدول */
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;margin-top:10px;min-width:820px}
+    th,td{border:1px solid var(--border);padding:10px;text-align:center;font-size:14px;vertical-align:middle}
+    th{background:#f3f6fb;color:#111827;font-weight:600}
+    td.question{text-align:right;direction:rtl;min-width:240px}
     .notes{min-width:160px}
-    .controls{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
-    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:14px}
     .btn.secondary{background:#6c757d}
     .summary{margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .pill{background:#f1f5fa;padding:8px 10px;border-radius:8px;border:1px solid #e6eefb;font-size:14px}
-    .weights input{width:80px}
-    .count{width:64px;padding:6px;text-align:center}
-    .small-btn{background:var(--btn-bg);border:1px solid #d7e7ff;padding:4px 8px;border-radius:6px;cursor:pointer;margin-left:6px}
+    .pill{background:#f8fafc;padding:8px 10px;border-radius:10px;border:1px solid #eef3ff;font-size:14px}
+    .count{width:64px;padding:6px;text-align:center;border-radius:8px}
+    .small-btn{background:var(--btn-bg);border:1px solid #d7e7ff;padding:6px 8px;border-radius:8px;cursor:pointer;margin-left:6px}
     .q-controls{display:flex;gap:6px;align-items:center;justify-content:flex-end}
-    .question-select{min-width:160px}
-    .position-select{min-width:140px}
+    .question-select{min-width:160px;padding:8px;border-radius:8px}
+    .position-select{min-width:140px;padding:8px;border-radius:8px}
+
     footer{margin-top:14px;font-size:13px;color:var(--muted)}
-    @media (max-width:700px){
+
+    /* ====== تجاوُب للجوال ====== */
+    @media (max-width:900px) {
+      /* اخفاء رأس الجدول وعرض كل صف كـ بطاقة رأسية */
+      table{min-width:0}
+      thead{display:none}
+      tbody tr{
+        display:block;
+        margin-bottom:14px;
+        border-radius:10px;
+        border:1px solid var(--border);
+        padding:10px;
+        background:#fff;
+        box-shadow:0 4px 14px rgba(15,15,15,0.03);
+      }
+      tbody tr td{
+        display:block;
+        text-align:right;
+        border:none;
+        padding:8px 0;
+        font-size:15px;
+      }
+      /* نعرض تسمية الحقل فوق قيمة الخلية باستخدام data-label */
+      tbody tr td::before{
+        content: attr(data-label);
+        display:block;
+        color:var(--muted);
+        font-size:13px;
+        margin-bottom:6px;
+        font-weight:600;
+      }
+      /* تعديلات على الحقول لتأخذ العرض الكامل */
+      .q-controls{flex-direction:column;align-items:stretch;gap:8px}
+      .question-select, .position-select, input[type="text"], input[type="number"], select {
+        width:100%;
+      }
+      .count{width:100%;padding:8px}
+      .notes input{width:100%}
+      .row-points{font-weight:700;color:var(--danger);font-size:16px}
+      .controls{justify-content:space-between}
+      .weights{display:flex;flex-wrap:wrap;gap:8px}
+      .weights label{font-size:13px}
       .meta{flex-direction:column;align-items:stretch}
-      .weights{display:flex;flex-wrap:wrap;gap:6px}
-      td.question{min-width:160px}
+      .container{padding:12px}
+      h1{font-size:16px}
+    }
+
+    /* تصغير للأجهزة المتناهية الصغر */
+    @media (max-width:420px){
+      body{padding:10px}
+      .container{padding:10px}
+      th,td{padding:8px}
+      .small-btn{padding:6px 6px;font-size:13px}
+      .btn{padding:8px 10px;font-size:13px}
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>نموذج تسجيل ملاحظات اختبار (خمس أجزاء) — تحرير الأسئلة والمواضع</h1>
+    <h1>نموذج تسجيل ملاحظات اختبار (خمس أجزاء) — عرض متجاوب للجوال</h1>
 
     <div class="meta">
       <label>اسم الطالب:
@@ -72,7 +136,7 @@
       </label>
 
       <div class="weights" style="margin-right:auto;display:flex;gap:8px;align-items:center">
-        <label>أوزان (خصم النقاط):</label>
+        <label style="font-weight:600;color:var(--muted)">أوزان (خصم النقاط):</label>
         <label>تنبيه <input id="w-tanbih" type="number" value="0.5" step="0.1" /></label>
         <label>خطأ <input id="w-khata" type="number" value="1" step="0.1" /></label>
         <label>تجويد <input id="w-tajweed" type="number" value="2" step="0.1" /></label>
@@ -81,8 +145,8 @@
       </div>
     </div>
 
-    <div style="overflow:auto">
-      <table id="mainTable">
+    <div class="table-wrap">
+      <table id="mainTable" aria-label="نموذج اختبار التلاوة">
         <thead>
           <tr>
             <th>الجزء / السؤال</th>
@@ -96,100 +160,124 @@
           </tr>
         </thead>
         <tbody>
-          <!-- صفوف 1..5 -->
+          <!-- صف 1 -->
           <tr data-row="1">
-            <td class="question">
+            <td class="question" data-label="الجزء / السؤال">
               <div class="q-controls">
-                <select class="question-select"></select>
-                <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
-                <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                <select class="question-select" aria-label="اختر السؤال"></select>
+                <div style="display:flex;gap:6px;">
+                  <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
+                  <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                </div>
               </div>
             </td>
-            <td>
-              <select class="position-select"></select>
+
+            <td data-label="الموضع داخل الجزء">
+              <select class="position-select" aria-label="اختر الموضع"></select>
             </td>
-            <td><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
-            <td class="notes"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
-            <td class="row-points">0</td>
+
+            <td data-label="تنبيه (مرات)"><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
+            <td data-label="خطأ (مرات)"><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
+            <td data-label="تجويد (مرات)"><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
+            <td data-label="لحن جلي (مرات)"><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
+            <td class="notes" data-label="ملاحظات"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
+            <td class="row-points" data-label="نقاط مخصومة">0</td>
           </tr>
 
+          <!-- صف 2 -->
           <tr data-row="2">
-            <td class="question">
+            <td class="question" data-label="الجزء / السؤال">
               <div class="q-controls">
-                <select class="question-select"></select>
-                <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
-                <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                <select class="question-select" aria-label="اختر السؤال"></select>
+                <div style="display:flex;gap:6px;">
+                  <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
+                  <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                </div>
               </div>
             </td>
-            <td>
-              <select class="position-select"></select>
+
+            <td data-label="الموضع داخل الجزء">
+              <select class="position-select" aria-label="اختر الموضع"></select>
             </td>
-            <td><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
-            <td class="notes"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
-            <td class="row-points">0</td>
+
+            <td data-label="تنبيه (مرات)"><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
+            <td data-label="خطأ (مرات)"><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
+            <td data-label="تجويد (مرات)"><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
+            <td data-label="لحن جلي (مرات)"><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
+            <td class="notes" data-label="ملاحظات"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
+            <td class="row-points" data-label="نقاط مخصومة">0</td>
           </tr>
 
+          <!-- صف 3 -->
           <tr data-row="3">
-            <td class="question">
+            <td class="question" data-label="الجزء / السؤال">
               <div class="q-controls">
-                <select class="question-select"></select>
-                <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
-                <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                <select class="question-select" aria-label="اختر السؤال"></select>
+                <div style="display:flex;gap:6px;">
+                  <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
+                  <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                </div>
               </div>
             </td>
-            <td>
-              <select class="position-select"></select>
+
+            <td data-label="الموضع داخل الجزء">
+              <select class="position-select" aria-label="اختر الموضع"></select>
             </td>
-            <td><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
-            <td class="notes"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
-            <td class="row-points">0</td>
+
+            <td data-label="تنبيه (مرات)"><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
+            <td data-label="خطأ (مرات)"><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
+            <td data-label="تجويد (مرات)"><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
+            <td data-label="لحن جلي (مرات)"><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
+            <td class="notes" data-label="ملاحظات"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
+            <td class="row-points" data-label="نقاط مخصومة">0</td>
           </tr>
 
+          <!-- صف 4 -->
           <tr data-row="4">
-            <td class="question">
+            <td class="question" data-label="الجزء / السؤال">
               <div class="q-controls">
-                <select class="question-select"></select>
-                <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
-                <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                <select class="question-select" aria-label="اختر السؤال"></select>
+                <div style="display:flex;gap:6px;">
+                  <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
+                  <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                </div>
               </div>
             </td>
-            <td>
-              <select class="position-select"></select>
+
+            <td data-label="الموضع داخل الجزء">
+              <select class="position-select" aria-label="اختر الموضع"></select>
             </td>
-            <td><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
-            <td class="notes"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
-            <td class="row-points">0</td>
+
+            <td data-label="تنبيه (مرات)"><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
+            <td data-label="خطأ (مرات)"><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
+            <td data-label="تجويد (مرات)"><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
+            <td data-label="لحن جلي (مرات)"><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
+            <td class="notes" data-label="ملاحظات"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
+            <td class="row-points" data-label="نقاط مخصومة">0</td>
           </tr>
 
+          <!-- صف 5 -->
           <tr data-row="5">
-            <td class="question">
+            <td class="question" data-label="الجزء / السؤال">
               <div class="q-controls">
-                <select class="question-select"></select>
-                <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
-                <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                <select class="question-select" aria-label="اختر السؤال"></select>
+                <div style="display:flex;gap:6px;">
+                  <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
+                  <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
+                </div>
               </div>
             </td>
-            <td>
-              <select class="position-select"></select>
+
+            <td data-label="الموضع داخل الجزء">
+              <select class="position-select" aria-label="اختر الموضع"></select>
             </td>
-            <td><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
-            <td><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
-            <td class="notes"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
-            <td class="row-points">0</td>
+
+            <td data-label="تنبيه (مرات)"><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
+            <td data-label="خطأ (مرات)"><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
+            <td data-label="تجويد (مرات)"><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
+            <td data-label="لحن جلي (مرات)"><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
+            <td class="notes" data-label="ملاحظات"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
+            <td class="row-points" data-label="نقاط مخصومة">0</td>
           </tr>
         </tbody>
       </table>
@@ -212,12 +300,12 @@
     </div>
 
     <footer>
-      طريقة الاستخدام: اضغط زر "✏️" لتغيير اسم السؤال في الصف، ثم اضغط "⚙" لإدخال قائمة المواضع لذلك السؤال (افصل بين المواضع بفاصلة). بعد ذلك اختر الموضع من العمود المجاور أثناء الاختبار وأدخل عدد مرات كل ملاحظة. النتائج تُحسب وتُصدّر إلى CSV.
+      افتح الصفحة على جوالك وستظهر واجهة ممتالية: كل صف سيعرض كـ "بطاقة" مع تسميات واضحة لكل حقل. زِد أو حَدِّث المواضع من زر ⚙، وادخل عدد مرات الملاحظات ثم "حساب النتائج".
     </footer>
   </div>
 
   <script>
-    // عناصر أساسية
+    // --- نفس كود الـ JS السابق مع تعديلات طفيفة ليتعامل مع data-labels / التجاوب ---
     const table = document.getElementById('mainTable');
     const wTanbih = document.getElementById('w-tanbih');
     const wKhata = document.getElementById('w-khata');
@@ -235,13 +323,12 @@
 
     const resetSavedBtn = document.getElementById('resetSaved');
 
-    // إعدادات افتراضية
     const DEFAULT_QUESTIONS = [
-      "سورة الأحقاف",
-      "سورة الذاريات",
-      "سورة المجادلة",
-      "سورة الملك",
-      "سورة النبأ"
+      "سورة الناس",
+      "سورة الفلق",
+      "سورة الإخلاص",
+      "سورة الفاتحة",
+      "سورة الأحقاف"
     ];
 
     const DEFAULT_POSITIONS = {
@@ -252,7 +339,6 @@
       "سورة الأحقاف": ["بداية السورة","آية متوسطة","آية قريبة للنهاية"]
     };
 
-    // استرجاع/حفظ في localStorage لراحة المستخدم
     function loadSaved(key, fallback) {
       try {
         const raw = localStorage.getItem(key);
@@ -271,7 +357,6 @@
     let questions = loadSaved('quiz_questions', DEFAULT_QUESTIONS.slice());
     let positionsMap = loadSaved('quiz_positions', DEFAULT_POSITIONS);
 
-    // تهيئة عناصر الاختيار في كل صف
     function initQuestionSelectors() {
       const rows = table.querySelectorAll('tbody tr');
       rows.forEach(row => {
@@ -280,59 +365,49 @@
         const editQBtn = row.querySelector('.edit-question');
         const editPBtn = row.querySelector('.edit-positions');
 
-        // ملء قائمة الأسئلة (نفس القائمة لكل صف، يمكن التعديل)
         populateQuestionSelect(qSelect);
 
-        // عند تغيير السؤال، نملأ مواضع هذا السؤال إن وجدت
         qSelect.addEventListener('change', () => {
           populatePositionSelect(pSelect, qSelect.value);
           save('quiz_questions', questions);
           save('quiz_positions', positionsMap);
         });
 
-        // زر تعديل اسم السؤال للصف الحالي (يضيف سؤال جديد أو يعدل الاسم)
         editQBtn.addEventListener('click', () => {
           const current = qSelect.value || '';
           const txt = prompt('اكتب اسم السؤال/الجزء (سيُضاف للقائمة أو يغيّر الاسم الحالي):', current);
           if(txt === null) return;
           const name = txt.trim();
           if(!name) { alert('الاسم فارغ'); return; }
-          // إذا الاسم جديد أضفه للقائمة
           if(!questions.includes(name)) {
             questions.push(name);
           }
-          // اختره في هذا الصف
           populateQuestionSelect(qSelect);
           qSelect.value = name;
-          // إذا ما يوجد مواضع مسجلة لهذا الاسم، أضف موضع افتراضي فارغ
           if(!positionsMap[name]) positionsMap[name] = ["موضع 1","موضع 2"];
           populatePositionSelect(pSelect, name);
           save('quiz_questions', questions);
           save('quiz_positions', positionsMap);
         });
 
-        // زر تحرير المواضع: يدخل المستخدم مواضع مفصولة بفواصل
         editPBtn.addEventListener('click', ()=>{
           const qName = qSelect.value;
           if(!qName) { alert('اختر السؤال أولاً أو اضغط ✏️ لإدخال اسم السؤال'); return; }
           const existing = (positionsMap[qName] || []).join(', ');
-          const input = prompt('أدخل المواضع لفهرس السؤال مفصولة بفاصلة (، أو ,)', existing);
+          const input = prompt('أدخل المواضع مفصولة بفاصلة (، أو ,)', existing);
           if(input === null) return;
-          // دعم الفواصل العربية والانجليزية
           const parts = input.split(/[,،]/).map(s=>s.trim()).filter(Boolean);
           positionsMap[qName] = parts.length ? parts : ["موضع 1"];
           populatePositionSelect(pSelect, qName);
           save('quiz_positions', positionsMap);
         });
 
-        // املأ المواضع بحسب السؤال الافتراضي
         const selQ = qSelect.value || questions[0];
         populatePositionSelect(pSelect, selQ);
       });
     }
 
     function populateQuestionSelect(selectEl) {
-      // حافظ على قيمة مختارة إن وجدت
       const current = selectEl.value;
       selectEl.innerHTML = '';
       questions.forEach(q=>{
@@ -341,14 +416,12 @@
         opt.textContent = q;
         selectEl.appendChild(opt);
       });
-      // إذا لا قيمة حالية ضع الأولى
       if(current && questions.includes(current)) selectEl.value = current;
       else selectEl.value = questions[0] || '';
     }
 
     function populatePositionSelect(selectEl, questionName) {
       selectEl.innerHTML = '';
-      // نأخذ من positionsMap أو من الافتراضي
       const arr = positionsMap[questionName] || DEFAULT_POSITIONS[questionName] || [];
       if(arr.length === 0) {
         const opt = document.createElement('option');
@@ -365,7 +438,6 @@
       });
     }
 
-    // دوال الحساب كما بالنسخة السابقة
     function getWeights(){
       return {
         tanbih: parseFloat(wTanbih.value) || 0,
@@ -426,7 +498,6 @@
       finalScore.textContent = fmt(final);
     }
 
-    // حدث عند تغيير أي خانة عددية أو الوزن
     table.addEventListener('input', (e)=>{
       if(e.target && e.target.classList.contains('count')) {
         if(parseInt(e.target.value) < 0) e.target.value = 0;
@@ -438,7 +509,6 @@
       el.addEventListener('input', ()=> recalcAll());
     });
 
-    // أزرار
     document.getElementById('recalc').addEventListener('click', ()=> recalcAll());
     document.getElementById('clearAll').addEventListener('click', ()=>{
       if(!confirm('هل تود إعادة تعيين كل القيم والملاحظات للبدء من جديد؟')) return;
@@ -452,11 +522,9 @@
       if(!confirm('سيتم حذف الأسئلة والمواضع المحفوظة محلياً. تابع؟')) return;
       localStorage.removeItem('quiz_questions');
       localStorage.removeItem('quiz_positions');
-      // إعادة التحميل لإعادة التحميل بالافتراضيات
       location.reload();
     });
 
-    // تصدير CSV يتضمن السؤال والموضع المختار
     document.getElementById('exportCsv').addEventListener('click', ()=>{
       const rows = table.querySelectorAll('tbody tr');
       const headers = ['الجزء','السؤال','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة'];
@@ -504,27 +572,19 @@
       URL.revokeObjectURL(url);
     });
 
-    // تعيين التاريخ لحظة الفتح
     document.getElementById('date').value = new Date().toLocaleDateString('ar-EG');
 
-    // تهيئة أولية: أملى الأسئلة والمواضع
     (function bootstrap(){
-      // تأكد وجود positionsMap لعناصر موجودة في questions
       questions.forEach(q=>{
         if(!positionsMap[q]) {
-          // إذا يوجد في DEFAULT_POSITIONS استخدمه، وإلا خلي موضع افتراضي
           positionsMap[q] = positionsMap[q] || DEFAULT_POSITIONS[q] || ["موضع 1"];
         }
       });
-      // حفظ أولي
       save('quiz_questions', questions);
       save('quiz_positions', positionsMap);
-      // تهيئة عناصر الصفوف
       initQuestionSelectors();
-      // حساب أولي
       recalcAll();
     })();
-
   </script>
 </body>
 </html>
