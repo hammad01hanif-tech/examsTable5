@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>نموذج اختبارات التلاوة — اختيار سور موحّد</title>
+  <title>نموذج اختبارات التلاوة — اختيار سور موحّد + نموذج شهري قابل للضبط</title>
   <style>
     :root{
       --bg:#f7f9fc;
@@ -25,9 +25,7 @@
       direction:rtl;
       padding:16px;
     }
-    .container{
-      max-width:980px;margin:12px auto;background:var(--card);padding:16px;border-radius:10px;box-shadow:var(--shadow);
-    }
+    .container{max-width:980px;margin:12px auto;background:var(--card);padding:16px;border-radius:10px;box-shadow:var(--shadow);}
     h1{margin:0 0 10px 0;font-size:18px}
     .meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
     label{font-size:13px;color:var(--muted)}
@@ -60,10 +58,10 @@
     .timer{display:flex;gap:8px;align-items:center}
     .timer-display{font-weight:700;background:#fff;border:1px solid var(--border);padding:6px 10px;border-radius:8px}
     .search-hint{font-size:12px;color:var(--muted);margin-top:4px}
+    #monthlySettings{display:none;margin-bottom:8px}
 
     footer{margin-top:14px;font-size:13px;color:var(--muted)}
 
-    /* responsive mobile */
     @media (max-width:900px){
       table{min-width:0} thead{display:none}
       tbody tr{display:block;margin-bottom:14px;border-radius:10px;border:1px solid var(--border);padding:10px;background:#fff}
@@ -112,6 +110,16 @@
       </div>
     </div>
 
+    <div id="monthlySettings">
+      <label>عدد أسئلة الاختبار الشهري:
+        <input id="monthlyCount" type="number" value="6" min="1" max="50" style="width:84px" />
+      </label>
+      <label>نسبة النجاح (%) للاختبار الشهري:
+        <input id="monthlyPassPct" type="number" value="97" min="0" max="100" style="width:84px" />
+      </label>
+      <button id="buildMonthlyBtn" class="small-btn">أنشئ نموذج شهري</button>
+    </div>
+
     <!-- unified datalist with all surahs -->
     <datalist id="surahDatalist"></datalist>
     <div class="search-hint">حقل "اختر السورة" متاح في كل سؤال — اكتب لفرز القائمة أو اختر من الاقتراحات.</div>
@@ -139,7 +147,7 @@
       <button class="btn" id="recalc">حساب النتائج</button>
       <button class="btn secondary" id="clearAll">إعادة تعيين</button>
       <button class="btn" id="exportCsv">تصدير CSV</button>
-      <button class="btn secondary" id="resetSaved">مسح الأسئلة والمواضع المحفوظة</button>
+      <button class="btn secondary" id="resetSaved">مسح البيانات المحفوظة</button>
 
       <button class="btn secondary" id="restoreLast">استعادة آخر اختبار</button>
       <div class="autosave-info" id="autosaveInfo">لا يوجد حفظ تلقائي حتى الآن.</div>
@@ -167,12 +175,12 @@
     </div>
 
     <footer>
-      تم توحيد طريقة اختيار السور في كل النماذج: استخدم حقل "اختر السورة" في أي سؤال لاختيار أو بحث اسم السورة. باقي وظائف النسخة السابقة (حفظ تلقائي، مؤقّت، +/-، تصدير) محفوظة.
+      الآن: اختر "نموذج الاختبار الشهري"، ضع عدد الأسئلة ونسبة النجاح ثم اضغط "أنشئ نموذج شهري" لبناء الجدول. باقي الوظائف كما هي.
     </footer>
   </div>
 
   <script>
-    // ===== full surah list (Arabic names, 1..114) =====
+    // قائمة السور (1..114) بالعربية
     const fullSurahList = [
       "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس",
       "هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه",
@@ -188,7 +196,7 @@
       "المسد","الإخلاص","الفلق","الناس"
     ];
 
-    // DOM
+    // DOM refs
     const studentNameEl = document.getElementById('studentName');
     const teacherNameEl = document.getElementById('teacherName');
     const dateEl = document.getElementById('date');
@@ -223,6 +231,12 @@
     const restoreLastBtn = document.getElementById('restoreLast');
     const autosaveInfo = document.getElementById('autosaveInfo');
 
+    const monthlySettings = document.getElementById('monthlySettings');
+    const monthlyCountEl = document.getElementById('monthlyCount');
+    const monthlyPassPctEl = document.getElementById('monthlyPassPct');
+    const buildMonthlyBtn = document.getElementById('buildMonthlyBtn');
+
+    // timer elements
     const timerDisplay = document.getElementById('timerDisplay');
     const timerStartBtn = document.getElementById('timerStart');
     const timerPauseBtn = document.getElementById('timerPause');
@@ -244,32 +258,15 @@
     let timerRunning = false;
     let timerStartTimestamp = null;
 
-    const AUTOSAVE_KEY = 'quiz_autosave_unified_v1';
+    const AUTOSAVE_KEY = 'quiz_autosave_unified_v2';
 
-    function fmt(n){
-      const rounded = Math.round((parseFloat(n) + Number.EPSILON) * 100) / 100;
-      const s = rounded.toString();
-      if(!s.includes('.')) return s;
-      return s.replace(/\.?0+$/,'').replace(/(\.\d)0$/,'$1');
-    }
-    function fmtDuration(sec){
-      sec = Math.round(sec || 0);
-      const m = Math.floor(sec/60).toString().padStart(2,'0');
-      const s = (sec%60).toString().padStart(2,'0');
-      return `${m}:${s}`;
-    }
+    function fmt(n){ const rounded = Math.round((parseFloat(n) + Number.EPSILON) * 100) / 100; const s = rounded.toString(); if(!s.includes('.')) return s; return s.replace(/\.?0+$/,'').replace(/(\.\d)0$/,'$1'); }
+    function fmtDuration(sec){ sec = Math.round(sec || 0); const m = Math.floor(sec/60).toString().padStart(2,'0'); const s = (sec%60).toString().padStart(2,'0'); return `${m}:${s}`; }
 
-    // populate datalist with all surahs
-    function populateSurahDatalist(){
-      surahDatalist.innerHTML = '';
-      fullSurahList.forEach(name=>{
-        const opt = document.createElement('option');
-        opt.value = name;
-        surahDatalist.appendChild(opt);
-      });
-    }
+    // populate datalist
+    function populateSurahDatalist(){ surahDatalist.innerHTML = ''; fullSurahList.forEach(name=>{ const opt = document.createElement('option'); opt.value = name; surahDatalist.appendChild(opt); }); }
 
-    // create row functions (no edit-button/pencil anymore)
+    // create rows
     function createPartsRow(index){
       const tr = document.createElement('tr'); tr.dataset.row = String(index);
       tr.innerHTML = `
@@ -326,6 +323,7 @@
       recalcAll();
       btn5.classList.toggle('active', n===5); btn10.classList.toggle('active', n===10); btnMonthly.classList.remove('active');
       modelLabelEl.textContent = modelLabel;
+      monthlySettings.style.display = 'none';
     }
 
     function buildMonthlyTable(n){
@@ -342,23 +340,17 @@
       recalcAll();
       btn5.classList.remove('active'); btn10.classList.remove('active'); btnMonthly.classList.add('active');
       modelLabelEl.textContent = modelLabel;
+      monthlySettings.style.display = 'block';
     }
 
-    // initialize handlers for inputs, datalist and counts and position edit
+    // init inputs
     function initRowInputs(){
       populateSurahDatalist();
-      // attach events
-      tbody.querySelectorAll('.surah-input').forEach(inp=>{
-        inp.addEventListener('input', ()=> { autosave(); recalcAll(); });
-        // placeholder already set in HTML
-      });
+      tbody.querySelectorAll('.surah-input').forEach(inp=>{ inp.addEventListener('input', ()=> { autosave(); recalcAll(); }); });
       tbody.querySelectorAll('.position-input').forEach(p=> p.addEventListener('input', ()=> autosave()));
-      tbody.querySelectorAll('.count').forEach(inp=>{
-        inp.addEventListener('input', ()=> { if(parseInt(inp.value) < 0) inp.value = 0; autosave(); recalcAll(); });
-      });
-      // attach pos-edit buttons for parts rows (if any)
+      tbody.querySelectorAll('.count').forEach(inp=>{ inp.addEventListener('input', ()=> { if(parseInt(inp.value)<0) inp.value=0; autosave(); recalcAll(); }); });
       tbody.querySelectorAll('.edit-positions').forEach(btn=>{
-        btn.addEventListener('click', (e)=>{
+        btn.addEventListener('click', ()=>{
           const row = btn.closest('tr');
           const existing = row.querySelector('.position-input')?.value || '';
           const input = prompt('اكتب المواضع مفصولة بفواصل للرجوع إليها لاحقاً (مثال: بداية الآية، منتصف الآية)', existing);
@@ -367,10 +359,9 @@
           autosave();
         });
       });
-      // inc/dec buttons via delegation handled below
     }
 
-    // delegation for inc/dec
+    // inc/dec delegation
     tbody.addEventListener('click', (e)=>{
       if(e.target.matches('.inc') || e.target.matches('.dec')){
         const btn = e.target; const input = btn.parentElement.querySelector('input.count');
@@ -388,28 +379,22 @@
     function getWeights(){ return { tanbih: parseFloat(wTanbih.value)||0, khata: parseFloat(wKhata.value)||0, tajweed: parseFloat(wTajweed.value)||0, lahn: parseFloat(wLahn.value)||0 }; }
 
     function recalcRow(row){
-      const weights = getWeights();
-      let pts=0;
-      row.querySelectorAll('input.count').forEach(inp=>{
-        const t = inp.dataset.type; const cnt = parseInt(inp.value) || 0;
-        if(t && weights[t] !== undefined && cnt > 0) pts += weights[t] * cnt;
-      });
-      row.querySelector('.row-points').textContent = fmt(pts);
-      return pts;
+      const weights = getWeights(); let pts=0;
+      row.querySelectorAll('input.count').forEach(inp=>{ const t = inp.dataset.type; const cnt = parseInt(inp.value) || 0; if(t && weights[t] !== undefined && cnt > 0) pts += weights[t] * cnt; });
+      row.querySelector('.row-points').textContent = fmt(pts); return pts;
     }
 
     function determinePassFail(finalPointsValue, maxScore, model){
       const percent = (maxScore>0)? (finalPointsValue/maxScore)*100 : 0;
       let threshold = 100;
       if(model === 'parts') threshold = (partsCount === 5) ? 97.5 : 95;
-      else if(model === 'monthly') threshold = parseFloat(document.getElementById('monthlyPassPct')?.value) || 0;
+      else if(model === 'monthly') threshold = parseFloat(monthlyPassPctEl.value) || 0;
       const pass = percent >= threshold;
       return { pass, percent, threshold };
     }
 
     function recalcAll(){
-      const rows = tbody.querySelectorAll('tr');
-      let totalTan=0,totalKh=0,totalTj=0,totalLn=0,totalPts=0;
+      const rows = tbody.querySelectorAll('tr'); let totalTan=0,totalKh=0,totalTj=0,totalLn=0,totalPts=0;
       rows.forEach(r=>{
         const tan = parseInt(r.querySelector('input[data-type="tanbih"]')?.value) || 0;
         const kh = parseInt(r.querySelector('input[data-type="khata"]')?.value) || 0;
@@ -427,7 +412,7 @@
       maxScoreDisplay.textContent = maxScore;
       let final = maxScore - totalPts; if(final < 0) final = 0;
       finalScore.textContent = fmt(final);
-      const res = determinePassFail(final, maxScore, (modelType==='parts')?'parts':'monthly');
+      const res = determinePassFail(final, maxScore, modelType === 'parts' ? 'parts' : 'monthly');
       showResultPill(res);
     }
 
@@ -438,8 +423,7 @@
 
     // autosave
     function collectState(){
-      const rows = [];
-      tbody.querySelectorAll('tr').forEach(r=>{
+      const rows = []; tbody.querySelectorAll('tr').forEach(r=>{
         rows.push({
           surah: r.querySelector('.surah-input') ? r.querySelector('.surah-input').value : '',
           pos: r.querySelector('.position-input') ? r.querySelector('.position-input').value : '',
@@ -457,17 +441,13 @@
         date: dateEl.value || '',
         maxScore: maxScoreInput.value,
         weights: { tanbih: wTanbih.value, khata: wKhata.value, tajweed: wTajweed.value, lahn: wLahn.value },
+        monthlyCount: monthlyCountEl.value || '',
+        monthlyPassPct: monthlyPassPctEl.value || '',
         rows, timer: { elapsedSeconds, timerRunning }, savedAt: new Date().toISOString()
       };
     }
 
-    function autosave(){
-      try{
-        const state = collectState();
-        save(AUTOSAVE_KEY, state);
-        autosaveInfo.textContent = `تم الحفظ تلقائياً: ${new Date(state.savedAt).toLocaleString('ar-EG')}`;
-      }catch(e){ console.error('autosave', e); }
-    }
+    function autosave(){ try{ const state = collectState(); save(AUTOSAVE_KEY, state); autosaveInfo.textContent = `تم الحفظ تلقائياً: ${new Date(state.savedAt).toLocaleString('ar-EG')}`; }catch(e){ console.error('autosave', e);} }
 
     function restoreLast(){
       const state = loadSaved(AUTOSAVE_KEY, null);
@@ -475,41 +455,23 @@
       studentNameEl.value = state.studentName || '';
       teacherNameEl.value = state.teacherName || '';
       dateEl.value = state.date || new Date().toLocaleDateString('ar-EG');
-      if(state.weights){
-        wTanbih.value = state.weights.tanbih; wKhata.value = state.weights.khata; wTajweed.value = state.weights.tajweed; wLahn.value = state.weights.lahn;
-      }
+      if(state.weights){ wTanbih.value = state.weights.tanbih; wKhata.value = state.weights.khata; wTajweed.value = state.weights.tajweed; wLahn.value = state.weights.lahn; }
       maxScoreInput.value = state.maxScore || maxScoreInput.value;
-      if(state.modelType === 'monthly') buildMonthlyTable(state.rows.length || 6);
+      monthlyCountEl.value = state.monthlyCount || monthlyCountEl.value;
+      monthlyPassPctEl.value = state.monthlyPassPct || monthlyPassPctEl.value;
+      if(state.modelType === 'monthly') buildMonthlyTable(state.rows.length || parseInt(monthlyCountEl.value || 6));
       else buildPartsTable(state.partsCount || 5);
-      // populate rows
       const rows = tbody.querySelectorAll('tr');
-      (state.rows || []).forEach((rdata,i)=>{
-        const r = rows[i];
-        if(!r) return;
-        if(r.querySelector('.surah-input')) r.querySelector('.surah-input').value = rdata.surah || '';
-        if(r.querySelector('.position-input')) r.querySelector('.position-input').value = rdata.pos || '';
-        if(r.querySelector('input[data-type="tanbih"]')) r.querySelector('input[data-type="tanbih"]').value = rdata.tan || 0;
-        if(r.querySelector('input[data-type="khata"]')) r.querySelector('input[data-type="khata"]').value = rdata.kh || 0;
-        if(r.querySelector('input[data-type="tajweed"]')) r.querySelector('input[data-type="tajweed"]').value = rdata.tj || 0;
-        if(r.querySelector('input[data-type="lahn"]')) r.querySelector('input[data-type="lahn"]').value = rdata.ln || 0;
-        if(r.querySelector('.notes input')) r.querySelector('.notes input').value = rdata.note || '';
-      });
+      (state.rows || []).forEach((rdata,i)=>{ const r = rows[i]; if(!r) return; if(r.querySelector('.surah-input')) r.querySelector('.surah-input').value = rdata.surah || ''; if(r.querySelector('.position-input')) r.querySelector('.position-input').value = rdata.pos || ''; if(r.querySelector('input[data-type="tanbih"]')) r.querySelector('input[data-type="tanbih"]').value = rdata.tan || 0; if(r.querySelector('input[data-type="khata"]')) r.querySelector('input[data-type="khata"]').value = rdata.kh || 0; if(r.querySelector('input[data-type="tajweed"]')) r.querySelector('input[data-type="tajweed"]').value = rdata.tj || 0; if(r.querySelector('input[data-type="lahn"]')) r.querySelector('input[data-type="lahn"]').value = rdata.ln || 0; if(r.querySelector('.notes input')) r.querySelector('.notes input').value = rdata.note || ''; });
       elapsedSeconds = state.timer ? state.timer.elapsedSeconds || 0 : 0;
       recalcAll();
       autosaveInfo.textContent = `تم استعادة آخر حفظ: ${state.savedAt ? new Date(state.savedAt).toLocaleString('ar-EG') : ''}`;
     }
 
-    // timer functions
+    // timer
     function updateTimerDisplay(){ timerDisplay.textContent = fmtDuration(elapsedSeconds); }
-    function startTimerInternal(){
-      if(timerInterval) clearInterval(timerInterval);
-      timerRunning = true; timerStartTimestamp = Date.now();
-      timerInterval = setInterval(()=>{ elapsedSeconds += 1; updateTimerDisplay(); }, 1000);
-      updateTimerDisplay();
-    }
-    function pauseTimerInternal(){
-      if(timerInterval) clearInterval(timerInterval); timerInterval = null; timerRunning = false; timerStartTimestamp = null; updateTimerDisplay();
-    }
+    function startTimerInternal(){ if(timerInterval) clearInterval(timerInterval); timerRunning = true; timerStartTimestamp = Date.now(); timerInterval = setInterval(()=>{ elapsedSeconds += 1; updateTimerDisplay(); }, 1000); updateTimerDisplay(); }
+    function pauseTimerInternal(){ if(timerInterval) clearInterval(timerInterval); timerInterval = null; timerRunning = false; timerStartTimestamp = null; updateTimerDisplay(); }
     function stopTimerInternal(){ if(timerInterval) clearInterval(timerInterval); timerInterval = null; timerRunning=false; timerStartTimestamp=null; updateTimerDisplay(); }
 
     timerStartBtn.addEventListener('click', ()=>{ if(timerRunning) return alert('المؤقِّت يعمل'); elapsedSeconds = 0; startTimerInternal(); autosave(); });
@@ -520,32 +482,20 @@
     // CSV export
     function exportCSV(){
       recalcAll(); autosave();
-      const out = [];
-      const student = studentNameEl.value || '---';
-      const teacher = teacherNameEl.value || '---';
-      const date = dateEl.value || new Date().toLocaleDateString('ar-EG');
-      const maxScore = parseFloat(maxScoreInput.value) || 100;
-      const final = parseFloat(finalScore.textContent) || 0;
-      const res = determinePassFail(final, maxScore, modelType === 'parts' ? 'parts' : 'monthly');
-      const resultText = res.pass ? 'ناجح' : 'راسب';
-      const resultPercent = fmt(res.percent);
+      const out=[]; const student = studentNameEl.value || '---'; const teacher = teacherNameEl.value || '---'; const date = dateEl.value || new Date().toLocaleDateString('ar-EG'); const maxScore = parseFloat(maxScoreInput.value) || 100; const final = parseFloat(finalScore.textContent) || 0; const res = determinePassFail(final, maxScore, modelType==='parts'?'parts':'monthly'); const resultText = res.pass ? 'ناجح' : 'راسب'; const resultPercent = fmt(res.percent);
       out.push(['اسم_الطالب', student, 'اسم_المعلم', teacher, 'التاريخ', date]);
       out.push(['نوع_النموذج', modelLabel]);
+      if(modelType==='monthly') out.push(['عدد_أسئلة_شهري', monthlyCountEl.value || '']);
+      if(modelType==='monthly') out.push(['نسبة_النجاح_المحددة', monthlyPassPctEl.value || '']);
       out.push(['النتيجة', resultText, 'النسبة_%', resultPercent]);
       out.push([]);
 
       if(modelType === 'parts'){
         out.push(['الجزء','السورة','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة']);
         tbody.querySelectorAll('tr').forEach(r=>{
-          const part = r.dataset.row || '';
-          const q = r.querySelector('.surah-input') ? r.querySelector('.surah-input').value : '';
-          const pos = r.querySelector('.position-input') ? r.querySelector('.position-input').value : '';
-          const t = r.querySelector('input[data-type="tanbih"]').value || '0';
-          const k = r.querySelector('input[data-type="khata"]').value || '0';
-          const tj = r.querySelector('input[data-type="tajweed"]').value || '0';
-          const l = r.querySelector('input[data-type="lahn"]').value || '0';
-          const note = r.querySelector('.notes input').value.replace(/"/g,'""');
-          const pts = r.querySelector('.row-points').textContent;
+          const part = r.dataset.row || ''; const q = r.querySelector('.surah-input') ? r.querySelector('.surah-input').value : ''; const pos = r.querySelector('.position-input') ? r.querySelector('.position-input').value : '';
+          const t = r.querySelector('input[data-type="tanbih"]').value || '0'; const k = r.querySelector('input[data-type="khata"]').value || '0'; const tj = r.querySelector('input[data-type="tajweed"]').value || '0'; const l = r.querySelector('input[data-type="lahn"]').value || '0';
+          const note = r.querySelector('.notes input').value.replace(/"/g,'""'); const pts = r.querySelector('.row-points').textContent;
           out.push([part,q,pos,t,k,tj,l,note,pts]);
         });
         out.push([]); out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
@@ -554,15 +504,9 @@
       } else {
         out.push(['رقم','السورة_المختارة','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة']);
         tbody.querySelectorAll('tr').forEach(r=>{
-          const idx = r.dataset.row || '';
-          const sur = r.querySelector('.surah-input') ? r.querySelector('.surah-input').value.replace(/"/g,'""') : '';
-          const pos = r.querySelector('.position-input') ? r.querySelector('.position-input').value.replace(/"/g,'""') : '';
-          const t = r.querySelector('input[data-type="tanbih"]').value || '0';
-          const k = r.querySelector('input[data-type="khata"]').value || '0';
-          const tj = r.querySelector('input[data-type="tajweed"]').value || '0';
-          const l = r.querySelector('input[data-type="lahn"]').value || '0';
-          const note = r.querySelector('.notes input').value.replace(/"/g,'""');
-          const pts = r.querySelector('.row-points').textContent;
+          const idx = r.dataset.row || ''; const sur = r.querySelector('.surah-input') ? r.querySelector('.surah-input').value.replace(/"/g,'""') : ''; const pos = r.querySelector('.position-input') ? r.querySelector('.position-input').value.replace(/"/g,'""') : '';
+          const t = r.querySelector('input[data-type="tanbih"]').value || '0'; const k = r.querySelector('input[data-type="khata"]').value || '0'; const tj = r.querySelector('input[data-type="tajweed"]').value || '0'; const l = r.querySelector('input[data-type="lahn"]').value || '0';
+          const note = r.querySelector('.notes input').value.replace(/"/g,'""'); const pts = r.querySelector('.row-points').textContent;
           out.push([idx,sur,pos,t,k,tj,l,note,pts]);
         });
         out.push([]); out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
@@ -570,50 +514,32 @@
         out.push(['الدرجة_النهائية', finalScore.textContent + ' / ' + maxScoreInput.value]);
       }
 
-      const sep = ',';
-      const csv = out.map(r => r.map(cell=>{
-        if(cell===undefined||cell===null) return '';
-        const s = String(cell);
-        if(s.includes(sep) || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
-        return s;
-      }).join(sep)).join('\n');
-
-      const csvWithBOM = '\uFEFF' + csv;
-      const blob = new Blob([csvWithBOM], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url;
-      const fileSuffix = modelLabel.replace(/\s+/g,'_');
-      a.download = (student.replace(/\s+/g,'_') || 'student') + `_${fileSuffix}_results.csv`;
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      const sep = ','; const csv = out.map(r => r.map(cell=>{ if(cell===undefined||cell===null) return ''; const s = String(cell); if(s.includes(sep) || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`; return s; }).join(sep)).join('\n');
+      const csvWithBOM = '\uFEFF' + csv; const blob = new Blob([csvWithBOM], {type:'text/csv;charset=utf-8;'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; const fileSuffix = modelLabel.replace(/\s+/g,'_'); a.download = (student.replace(/\s+/g,'_') || 'student') + `_${fileSuffix}_results.csv`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
-    // event wiring
+    // events wiring
     document.getElementById('date').value = new Date().toLocaleDateString('ar-EG');
     recalcBtn.addEventListener('click', ()=> recalcAll());
-    clearAllBtn.addEventListener('click', ()=>{
-      if(!confirm('هل تود إعادة تعيين كل القيم؟')) return;
-      tbody.querySelectorAll('input.count').forEach(c=>c.value=0);
-      tbody.querySelectorAll('input[type="text"]').forEach(t=>t.value='');
-      tbody.querySelectorAll('textarea').forEach(t=>t.value='');
-      tbody.querySelectorAll('.row-points').forEach(r=>r.textContent='0');
-      recalcAll(); autosave();
-    });
+    clearAllBtn.addEventListener('click', ()=>{ if(!confirm('هل تود إعادة تعيين كل القيم؟')) return; tbody.querySelectorAll('input.count').forEach(c=>c.value=0); tbody.querySelectorAll('input[type="text"]').forEach(t=>t.value=''); tbody.querySelectorAll('textarea').forEach(t=>t.value=''); tbody.querySelectorAll('.row-points').forEach(r=>r.textContent='0'); recalcAll(); autosave(); });
     exportCsvBtn.addEventListener('click', ()=> exportCSV());
     resetSavedBtn.addEventListener('click', ()=> { if(!confirm('مسح البيانات المحفوظة محلياً؟')) return; localStorage.removeItem(AUTOSAVE_KEY); localStorage.removeItem('quiz_questions'); localStorage.removeItem('quiz_positions'); location.reload(); });
     restoreLastBtn.addEventListener('click', ()=> restoreLast());
-    btn5.addEventListener('click', ()=> buildPartsTable(5));
-    btn10.addEventListener('click', ()=> buildPartsTable(10));
-    btnMonthly.addEventListener('click', ()=> { const c = parseInt(document.getElementById('monthlyCount')?.value || 6); buildMonthlyTable(c); });
+    btn5.addEventListener('click', ()=> { buildPartsTable(5); autosave(); });
+    btn10.addEventListener('click', ()=> { buildPartsTable(10); autosave(); });
+    btnMonthly.addEventListener('click', ()=> { monthlySettings.style.display = 'block'; /* default build with current count */ buildMonthlyTable(parseInt(monthlyCountEl.value || 6)); autosave(); });
+
+    buildMonthlyBtn.addEventListener('click', ()=> { const n = parseInt(monthlyCountEl.value) || 1; buildMonthlyTable(n); autosave(); });
 
     document.addEventListener('input', (e)=> { if(e.target && (e.target.matches('input') || e.target.matches('textarea') || e.target.matches('select'))){ recalcAll(); autosave(); } });
 
-    // timer
-    timerStartBtn.addEventListener('click', ()=> { if(timerRunning) return alert('المؤقِّت يعمل'); elapsedSeconds = 0; if(timerInterval) clearInterval(timerInterval); startTimerInternal(); autosave(); });
-    timerPauseBtn.addEventListener('click', ()=> { if(!timerRunning) return alert('المؤقِّت متوقف'); pauseTimerInternal(); autosave(); });
-    timerResumeBtn.addEventListener('click', ()=> { if(timerRunning) return alert('المؤقِّت يعمل'); startTimerInternal(); autosave(); });
-    timerStopBtn.addEventListener('click', ()=> { if(!confirm('إيقاف نهائي للمؤقِّت؟')) return; pauseTimerInternal(); autosave(); });
+    // timer handlers
+    timerStartBtn.addEventListener('click', ()=>{ if(timerRunning) return alert('المؤقِّت يعمل'); elapsedSeconds = 0; startTimerInternal(); autosave(); });
+    timerPauseBtn.addEventListener('click', ()=>{ if(!timerRunning) return alert('المؤقِّت متوقف'); pauseTimerInternal(); autosave(); });
+    timerResumeBtn.addEventListener('click', ()=>{ if(timerRunning) return alert('المؤقِّت يعمل'); startTimerInternal(); autosave(); });
+    timerStopBtn.addEventListener('click', ()=>{ if(!confirm('إيقاف نهائي للمؤقِّت؟')) return; pauseTimerInternal(); autosave(); });
 
-    // initial bootstrap
+    // bootstrap
     (function bootstrap(){
       populateSurahDatalist();
       buildPartsTable(5);
