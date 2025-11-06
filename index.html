@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>نموذج اختبارات التلاوة — 5/10 أجزاء & اختبار شهري (نفس التصميم)</title>
+  <title>نموذج اختبارات التلاوة — اختيار سور موحّد</title>
   <style>
     :root{
       --bg:#f7f9fc;
@@ -23,32 +23,21 @@
       margin:0;
       color:#111827;
       direction:rtl;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
       padding:16px;
     }
     .container{
-      max-width:980px;
-      margin:12px auto;
-      background:var(--card);
-      padding:16px;
-      border-radius:10px;
-      box-shadow:var(--shadow);
+      max-width:980px;margin:12px auto;background:var(--card);padding:16px;border-radius:10px;box-shadow:var(--shadow);
     }
     h1{margin:0 0 10px 0;font-size:18px}
     .meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
     label{font-size:13px;color:var(--muted)}
     input[type="text"], input[type="number"], select, textarea{
-      padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;
-      background:#fff;
+      padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;
     }
     .weights input{width:84px}
-    .weights label{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
-
     .mode-switch{display:flex;gap:8px;margin-bottom:8px}
     .mode-btn{background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer}
     .mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-
     .table-wrap{overflow:auto}
     table{width:100%;border-collapse:collapse;margin-top:10px;min-width:820px}
     th,td{border:1px solid var(--border);padding:10px;text-align:center;font-size:14px;vertical-align:middle}
@@ -58,83 +47,33 @@
     .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
     .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:14px}
     .btn.secondary{background:#6c757d}
-    .summary{margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
     .pill{background:#f8fafc;padding:8px 10px;border-radius:10px;border:1px solid #eef3ff;font-size:14px}
-    .pill.result{font-weight:700;padding:10px 12px;border-radius:10px}
-    .pill.result.pass{background:#e6f8ee;border-color:#d1f0db;color:var(--success)}
-    .pill.result.fail{background:#fff1f0;border-color:#ffd6d1;color:var(--danger)}
+    .result{font-weight:700;padding:10px 12px;border-radius:10px}
+    .result.pass{background:#e6f8ee;border-color:#d1f0db;color:var(--success)}
+    .result.fail{background:#fff1f0;border-color:#ffd6d1;color:var(--danger)}
     .count{width:64px;padding:6px;text-align:center;border-radius:8px}
+    .num-control{display:inline-flex;align-items:center;gap:6px}
+    .num-control button{width:30px;height:30px;border-radius:6px;border:1px solid #e0e7ff;background:var(--btn-bg);cursor:pointer}
     .small-btn{background:var(--btn-bg);border:1px solid #d7e7ff;padding:6px 8px;border-radius:8px;cursor:pointer;margin-left:6px}
     .q-controls{display:flex;gap:6px;align-items:center;justify-content:flex-end}
-    .question-select{min-width:160px;padding:8px;border-radius:8px}
-    .position-select{min-width:140px;padding:8px;border-radius:8px}
-    .q-number{
-      display:inline-block;
-      min-width:36px;
-      text-align:center;
-      padding:6px 8px;
-      border-radius:8px;
-      background:#f1f5fa;
-      color:#0b2f66;
-      font-weight:700;
-      margin-left:8px;
-      font-size:13px;
-    }
-
-    .monthly-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+    .q-number{display:inline-block;min-width:36px;text-align:center;padding:6px 8px;border-radius:8px;background:#f1f5fa;color:#0b2f66;font-weight:700;margin-left:8px;font-size:13px}
+    .timer{display:flex;gap:8px;align-items:center}
+    .timer-display{font-weight:700;background:#fff;border:1px solid var(--border);padding:6px 10px;border-radius:8px}
+    .search-hint{font-size:12px;color:var(--muted);margin-top:4px}
 
     footer{margin-top:14px;font-size:13px;color:var(--muted)}
 
-    /* ====== تجاوب للجوال ====== */
-    @media (max-width:900px) {
-      table{min-width:0}
-      thead{display:none}
-      tbody tr{
-        display:block;
-        margin-bottom:14px;
-        border-radius:10px;
-        border:1px solid var(--border);
-        padding:10px;
-        background:#fff;
-        box-shadow:0 4px 14px rgba(15,15,15,0.03);
-      }
-      tbody tr td{
-        display:block;
-        text-align:right;
-        border:none;
-        padding:8px 0;
-        font-size:15px;
-      }
-      tbody tr td::before{
-        content: attr(data-label);
-        display:block;
-        color:var(--muted);
-        font-size:13px;
-        margin-bottom:6px;
-        font-weight:600;
-      }
+    /* responsive mobile */
+    @media (max-width:900px){
+      table{min-width:0} thead{display:none}
+      tbody tr{display:block;margin-bottom:14px;border-radius:10px;border:1px solid var(--border);padding:10px;background:#fff}
+      tbody tr td{display:block;text-align:right;border:none;padding:8px 0;font-size:15px}
+      tbody tr td::before{content: attr(data-label);display:block;color:var(--muted);font-size:13px;margin-bottom:6px;font-weight:600}
       .q-controls{flex-direction:column;align-items:stretch;gap:8px}
-      .question-select, .position-select, input[type="text"], input[type="number"], select, textarea {
-        width:100%;
-      }
-      .count{width:100%;padding:8px}
-      .notes input, .notes textarea{width:100%}
-      .row-points{font-weight:700;color:var(--danger);font-size:16px}
-      .controls{justify-content:space-between}
-      .weights{display:flex;flex-wrap:wrap;gap:8px}
-      .meta{flex-direction:column;align-items:stretch}
-      .container{padding:12px}
-      h1{font-size:16px}
-      .q-number{margin-left:0;display:block;margin-bottom:6px}
-      .monthly-controls{flex-direction:column;align-items:stretch}
-    }
-
-    @media (max-width:420px){
-      body{padding:10px}
-      .container{padding:10px}
-      th,td{padding:8px}
-      .small-btn{padding:6px 6px;font-size:13px}
-      .btn{padding:8px 10px;font-size:13px}
+      .question-input, .position-input, input[type="text"], input[type="number"], select, textarea {width:100%}
+      .num-control{width:100%;justify-content:space-between}
+      .num-control input{flex:1;margin:0 6px}
+      .timer{flex-direction:column;align-items:stretch}
     }
   </style>
 </head>
@@ -143,7 +82,6 @@
     <h1>نموذج اختبارات التلاوة</h1>
 
     <div class="meta">
-      <!-- User requested: student first, then teacher -->
       <label>اسم الطالب:
         <input id="studentName" type="text" placeholder="اكتب اسم الطالب" />
       </label>
@@ -174,17 +112,9 @@
       </div>
     </div>
 
-    <div id="monthlySettings" style="display:none;margin-bottom:8px">
-      <div class="monthly-controls">
-        <label>عدد أسئلة الاختبار الشهري:
-          <input id="monthlyCount" type="number" value="6" min="1" max="50" style="width:80px" />
-        </label>
-        <label>نسبة النجاح (%) للاختبار الشهري:
-          <input id="monthlyPassPct" type="number" value="60" min="0" max="100" style="width:80px" />
-        </label>
-        <button id="buildMonthlyBtn" class="small-btn">أنشئ نموذج شهري</button>
-      </div>
-    </div>
+    <!-- unified datalist with all surahs -->
+    <datalist id="surahDatalist"></datalist>
+    <div class="search-hint">حقل "اختر السورة" متاح في كل سؤال — اكتب لفرز القائمة أو اختر من الاقتراحات.</div>
 
     <div class="table-wrap">
       <table id="mainTable" aria-label="نموذج اختبار التلاوة" data-parts="5" data-model="parts">
@@ -201,9 +131,7 @@
             <th>نقاط مخصومة</th>
           </tr>
         </thead>
-        <tbody id="tableBody">
-          <!-- يبنى ديناميكياً -->
-        </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
 
@@ -212,6 +140,19 @@
       <button class="btn secondary" id="clearAll">إعادة تعيين</button>
       <button class="btn" id="exportCsv">تصدير CSV</button>
       <button class="btn secondary" id="resetSaved">مسح الأسئلة والمواضع المحفوظة</button>
+
+      <button class="btn secondary" id="restoreLast">استعادة آخر اختبار</button>
+      <div class="autosave-info" id="autosaveInfo">لا يوجد حفظ تلقائي حتى الآن.</div>
+
+      <div style="margin-right:auto;display:flex;align-items:center;gap:8px">
+        <div class="timer">
+          <div class="timer-display" id="timerDisplay">00:00</div>
+          <button class="small-btn" id="timerStart">بدء</button>
+          <button class="small-btn" id="timerPause">إيقاف مؤقت</button>
+          <button class="small-btn" id="timerResume">استئناف</button>
+          <button class="small-btn" id="timerStop">إيقاف نهائي</button>
+        </div>
+      </div>
     </div>
 
     <div class="summary" id="summary">
@@ -222,21 +163,39 @@
       <div class="pill">إجمالي اللحن الجلي: <span id="sum-lahn">0</span></div>
       <div class="pill">مجموع النقاط المخصومة: <span id="sum-points">0</span></div>
       <div class="pill">الدرجة النهائية: <span id="final-score">0</span> / <span id="maxScoreDisplay">100</span></div>
-      <div id="resultPill" class="pill result" style="display:none"></div>
+      <div id="resultPill" class="result" style="display:none"></div>
     </div>
 
     <footer>
-      الآن: تم تعديل نموذج الاختبار الشهري ليستخدم نفس أعمدة الملاحظات (تنبيه/خطأ/تجويد/لحن جلي). يمكنك تحديد عدد الأسئلة ونسبة النجاح للاختبار الشهري. في جميع النماذج اسم الطالب يظهر أولاً ثم اسم المعلم. عند التصدير يُضاف نوع النموذج ونتيجة النجاح/الرسوب واسم المعلم.
+      تم توحيد طريقة اختيار السور في كل النماذج: استخدم حقل "اختر السورة" في أي سؤال لاختيار أو بحث اسم السورة. باقي وظائف النسخة السابقة (حفظ تلقائي، مؤقّت، +/-، تصدير) محفوظة.
     </footer>
   </div>
 
   <script>
-    // عناصر
+    // ===== full surah list (Arabic names, 1..114) =====
+    const fullSurahList = [
+      "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس",
+      "هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه",
+      "الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم",
+      "لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر",
+      "فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق",
+      "الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة",
+      "الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج",
+      "نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس",
+      "التكوير","الإنفطار","المطففين","الإنشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد",
+      "الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات",
+      "القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر",
+      "المسد","الإخلاص","الفلق","الناس"
+    ];
+
+    // DOM
     const studentNameEl = document.getElementById('studentName');
     const teacherNameEl = document.getElementById('teacherName');
-    const table = document.getElementById('mainTable');
-    const tbody = document.getElementById('tableBody');
+    const dateEl = document.getElementById('date');
+    const surahDatalist = document.getElementById('surahDatalist');
     const tableHead = document.getElementById('tableHead');
+    const tbody = document.getElementById('tableBody');
+    const modelLabelEl = document.getElementById('modelLabel');
 
     const wTanbih = document.getElementById('w-tanbih');
     const wKhata = document.getElementById('w-khata');
@@ -251,450 +210,336 @@
     const sumLahn = document.getElementById('sum-lahn');
     const sumPoints = document.getElementById('sum-points');
     const finalScore = document.getElementById('final-score');
-    const modelLabelEl = document.getElementById('modelLabel');
     const resultPill = document.getElementById('resultPill');
 
     const btn5 = document.getElementById('btn-5');
     const btn10 = document.getElementById('btn-10');
     const btnMonthly = document.getElementById('btn-monthly');
+
+    const recalcBtn = document.getElementById('recalc');
+    const clearAllBtn = document.getElementById('clearAll');
+    const exportCsvBtn = document.getElementById('exportCsv');
     const resetSavedBtn = document.getElementById('resetSaved');
+    const restoreLastBtn = document.getElementById('restoreLast');
+    const autosaveInfo = document.getElementById('autosaveInfo');
 
-    const monthlySettings = document.getElementById('monthlySettings');
-    const monthlyCountEl = document.getElementById('monthlyCount');
-    const monthlyPassPctEl = document.getElementById('monthlyPassPct');
-    const buildMonthlyBtn = document.getElementById('buildMonthlyBtn');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerStartBtn = document.getElementById('timerStart');
+    const timerPauseBtn = document.getElementById('timerPause');
+    const timerResumeBtn = document.getElementById('timerResume');
+    const timerStopBtn = document.getElementById('timerStop');
 
-    document.getElementById('date').value = new Date().toLocaleDateString('ar-EG');
+    // persistent helpers
+    function loadSaved(key, fallback){ try{ const raw = localStorage.getItem(key); if(!raw) return fallback; return JSON.parse(raw);}catch(e){return fallback;} }
+    function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
 
-    // بيانات افتراضية
-    const DEFAULT_QUESTIONS = [
-      "سورة الناس",
-      "سورة الفلق",
-      "سورة الإخلاص",
-      "سورة الفاتحة",
-      "سورة الأحقاف"
-    ];
-    const DEFAULT_POSITIONS = {
-      "سورة الناس": ["بداية الآية","منتصف الآية","نهاية الآية"],
-      "سورة الفلق": ["أول آية","آية وسطى","آخر آية"],
-      "سورة الإخلاص": ["بداية","منتصف","نهاية"],
-      "سورة الفاتحة": ["آية 1-2","آية 3-4","آية 5-7"],
-      "سورة الأحقاف": ["بداية السورة","آية متوسطة","آية قريبة للنهاية"]
-    };
-
-    function loadSaved(key, fallback) {
-      try {
-        const raw = localStorage.getItem(key);
-        if(!raw) return fallback;
-        return JSON.parse(raw);
-      } catch(e) {
-        return fallback;
-      }
-    }
-    function save(key, value) {
-      try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){}
-    }
-
-    let questions = loadSaved('quiz_questions', DEFAULT_QUESTIONS.slice());
-    let positionsMap = loadSaved('quiz_positions', DEFAULT_POSITIONS);
-
-    // الحالة الحالية
-    let modelType = 'parts'; // 'parts' أو 'monthly'
+    // state
+    let modelType = 'parts';
     let partsCount = 5;
     let modelLabel = 'خمسة أجزاء';
 
-    // تنسيق رقم/كسور
+    // timer state
+    let timerInterval = null;
+    let elapsedSeconds = 0;
+    let timerRunning = false;
+    let timerStartTimestamp = null;
+
+    const AUTOSAVE_KEY = 'quiz_autosave_unified_v1';
+
     function fmt(n){
       const rounded = Math.round((parseFloat(n) + Number.EPSILON) * 100) / 100;
       const s = rounded.toString();
       if(!s.includes('.')) return s;
       return s.replace(/\.?0+$/,'').replace(/(\.\d)0$/,'$1');
     }
+    function fmtDuration(sec){
+      sec = Math.round(sec || 0);
+      const m = Math.floor(sec/60).toString().padStart(2,'0');
+      const s = (sec%60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
 
-    // إنشاء صف لنموذج الأجزاء (5/10) — نفس السابق
+    // populate datalist with all surahs
+    function populateSurahDatalist(){
+      surahDatalist.innerHTML = '';
+      fullSurahList.forEach(name=>{
+        const opt = document.createElement('option');
+        opt.value = name;
+        surahDatalist.appendChild(opt);
+      });
+    }
+
+    // create row functions (no edit-button/pencil anymore)
     function createPartsRow(index){
-      const tr = document.createElement('tr');
-      tr.dataset.row = String(index);
+      const tr = document.createElement('tr'); tr.dataset.row = String(index);
       tr.innerHTML = `
-        <td data-label="رقم" class="q-num-cell"><span class="q-number">${index}</span></td>
+        <td data-label="رقم"><span class="q-number">${index}</span></td>
         <td class="question" data-label="الجزء / السؤال">
-          <div class="q-controls">
-            <select class="question-select" aria-label="اختر السؤال"></select>
+          <div class="q-controls" style="align-items:center;gap:8px;">
+            <input class="question-input surah-input" list="surahDatalist" placeholder="اختر السورة" style="min-width:160px;padding:8px;border-radius:8px;border:1px solid var(--border);" />
             <div style="display:flex;gap:6px;">
-              <button title="تعديل اسم السؤال/الجزء" class="small-btn edit-question">✏️</button>
               <button title="تحرير مواضع السؤال" class="small-btn edit-positions">⚙</button>
             </div>
           </div>
         </td>
-        <td data-label="الموضع داخل الجزء">
-          <select class="position-select" aria-label="اختر الموضع"></select>
-        </td>
-        <td data-label="تنبيه (مرات)"><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
-        <td data-label="خطأ (مرات)"><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
-        <td data-label="تجويد (مرات)"><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
-        <td data-label="لحن جلي (مرات)"><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
+        <td data-label="الموضع داخل الجزء"><input class="position-input" type="text" placeholder="موضع (اختياري)" /></td>
+        <td data-label="تنبيه (مرات)"><div class="num-control"><button class="dec">-</button><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /><button class="inc">+</button></div></td>
+        <td data-label="خطأ (مرات)"><div class="num-control"><button class="dec">-</button><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /><button class="inc">+</button></div></td>
+        <td data-label="تجويد (مرات)"><div class="num-control"><button class="dec">-</button><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /><button class="inc">+</button></div></td>
+        <td data-label="لحن جلي (مرات)"><div class="num-control"><button class="dec">-</button><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /><button class="inc">+</button></div></td>
         <td class="notes" data-label="ملاحظات"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
         <td class="row-points" data-label="نقاط مخصومة">0</td>
       `;
       return tr;
     }
 
-    // إنشاء صف لنموذج الشهري بنفس تصميم الأعمدة (سؤال مفتوح + نفس أعمدة الملاحظات)
     function createMonthlyRow(index){
-      const tr = document.createElement('tr');
-      tr.dataset.row = String(index);
+      const tr = document.createElement('tr'); tr.dataset.row = String(index);
       tr.innerHTML = `
-        <td data-label="رقم" class="q-num-cell"><span class="q-number">${index}</span></td>
-        <td class="question" data-label="نص السؤال">
-          <textarea class="monthly-question-text" rows="2" placeholder="اكتب نص السؤال هنا"></textarea>
+        <td data-label="رقم"><span class="q-number">${index}</span></td>
+        <td class="question" data-label="اختر السورة">
+          <input class="question-input surah-input" list="surahDatalist" placeholder="اختر السورة" style="min-width:160px;padding:8px;border-radius:8px;border:1px solid var(--border);" />
         </td>
-        <td data-label="الموضع داخل الجزء">
-          <input class="monthly-position" type="text" placeholder="اختياري: موضع/مقطع" />
-        </td>
-        <td data-label="تنبيه (مرات)"><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /></td>
-        <td data-label="خطأ (مرات)"><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /></td>
-        <td data-label="تجويد (مرات)"><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /></td>
-        <td data-label="لحن جلي (مرات)"><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /></td>
+        <td data-label="الموضع داخل الجزء"><input class="position-input" type="text" placeholder="موضع (اختياري)"/></td>
+        <td data-label="تنبيه (مرات)"><div class="num-control"><button class="dec">-</button><input class="count" type="number" data-type="tanbih" value="0" min="0" step="1" /><button class="inc">+</button></div></td>
+        <td data-label="خطأ (مرات)"><div class="num-control"><button class="dec">-</button><input class="count" type="number" data-type="khata" value="0" min="0" step="1" /><button class="inc">+</button></div></td>
+        <td data-label="تجويد (مرات)"><div class="num-control"><button class="dec">-</button><input class="count" type="number" data-type="tajweed" value="0" min="0" step="1" /><button class="inc">+</button></div></td>
+        <td data-label="لحن جلي (مرات)"><div class="num-control"><button class="dec">-</button><input class="count" type="number" data-type="lahn" value="0" min="0" step="1" /><button class="inc">+</button></div></td>
         <td class="notes" data-label="ملاحظات"><input type="text" placeholder="ملاحظة سريعة" style="width:100%"/></td>
         <td class="row-points" data-label="نقاط مخصومة">0</td>
       `;
       return tr;
     }
 
-    // بناء جدول الأجزاء (5/10)
+    // build tables
     function buildPartsTable(n){
-      modelType = 'parts';
-      partsCount = n;
-      table.dataset.parts = String(n);
-      table.dataset.model = 'parts';
-      modelLabel = (n === 10) ? 'عشرة أجزاء' : 'خمسة أجزاء';
-      modelLabelEl.textContent = modelLabel;
-      monthlySettings.style.display = 'none';
-      // set header
+      modelType = 'parts'; partsCount = n; modelLabel = (n===10)?'عشرة أجزاء':'خمسة أجزاء';
       tableHead.innerHTML = `
         <tr>
-          <th>رقم</th>
-          <th>الجزء / السؤال</th>
-          <th>الموضع داخل الجزء</th>
-          <th>تنبيه (مرات)</th>
-          <th>خطأ (مرات)</th>
-          <th>تجويد (مرات)</th>
-          <th>لحن جلي (مرات)</th>
-          <th class="notes">ملاحظات</th>
-          <th>نقاط مخصومة</th>
-        </tr>
-      `;
+          <th>رقم</th><th>الجزء / السؤال</th><th>الموضع داخل الجزء</th>
+          <th>تنبيه (مرات)</th><th>خطأ (مرات)</th><th>تجويد (مرات)</th>
+          <th>لحن جلي (مرات)</th><th class="notes">ملاحظات</th><th>نقاط مخصومة</th>
+        </tr>`;
       tbody.innerHTML = '';
       for(let i=1;i<=n;i++) tbody.appendChild(createPartsRow(i));
-      initQuestionSelectors();
+      initRowInputs();
       recalcAll();
-      btn5.classList.toggle('active', n===5);
-      btn10.classList.toggle('active', n===10);
-      btnMonthly.classList.remove('active');
+      btn5.classList.toggle('active', n===5); btn10.classList.toggle('active', n===10); btnMonthly.classList.remove('active');
+      modelLabelEl.textContent = modelLabel;
     }
 
-    // بناء جدول الشهري بنفس أعمدة الملاحظات
     function buildMonthlyTable(n){
-      modelType = 'monthly';
-      table.dataset.model = 'monthly';
-      modelLabel = 'الاختبار الشهري';
-      modelLabelEl.textContent = modelLabel;
-      monthlySettings.style.display = 'block';
+      modelType = 'monthly'; modelLabel = 'الاختبار الشهري';
       tableHead.innerHTML = `
         <tr>
-          <th>رقم</th>
-          <th>نص السؤال</th>
-          <th>الموضع (اختياري)</th>
-          <th>تنبيه (مرات)</th>
-          <th>خطأ (مرات)</th>
-          <th>تجويد (مرات)</th>
-          <th>لحن جلي (مرات)</th>
-          <th class="notes">ملاحظات</th>
-          <th>نقاط مخصومة</th>
-        </tr>
-      `;
+          <th>رقم</th><th>اختر السورة</th><th>الموضع داخل الجزء</th>
+          <th>تنبيه (مرات)</th><th>خطأ (مرات)</th><th>تجويد (مرات)</th>
+          <th>لحن جلي (مرات)</th><th class="notes">ملاحظات</th><th>نقاط مخصومة</th>
+        </tr>`;
       tbody.innerHTML = '';
       for(let i=1;i<=n;i++) tbody.appendChild(createMonthlyRow(i));
-      initMonthlyInputs(); // add listeners for monthly fields
+      initRowInputs();
       recalcAll();
-      btn5.classList.remove('active');
-      btn10.classList.remove('active');
-      btnMonthly.classList.add('active');
+      btn5.classList.remove('active'); btn10.classList.remove('active'); btnMonthly.classList.add('active');
+      modelLabelEl.textContent = modelLabel;
     }
 
-    // populate question selects and position selects for parts rows
-    function populateQuestionSelect(selectEl) {
-      const current = selectEl.value;
-      selectEl.innerHTML = '';
-      questions.forEach(q=>{
-        const opt = document.createElement('option'); opt.value = q; opt.textContent = q;
-        selectEl.appendChild(opt);
+    // initialize handlers for inputs, datalist and counts and position edit
+    function initRowInputs(){
+      populateSurahDatalist();
+      // attach events
+      tbody.querySelectorAll('.surah-input').forEach(inp=>{
+        inp.addEventListener('input', ()=> { autosave(); recalcAll(); });
+        // placeholder already set in HTML
       });
-      if(current && questions.includes(current)) selectEl.value = current;
-      else selectEl.value = questions[0] || '';
-    }
-    function populatePositionSelect(selectEl, questionName) {
-      selectEl.innerHTML = '';
-      const arr = positionsMap[questionName] || DEFAULT_POSITIONS[questionName] || [];
-      if(arr.length === 0){
-        const opt = document.createElement('option'); opt.value=''; opt.textContent='لا يوجد مواضع — اضغط ⚙ لإضافة';
-        selectEl.appendChild(opt); return;
-      }
-      arr.forEach(p=>{
-        const opt = document.createElement('option'); opt.value=p; opt.textContent=p;
-        selectEl.appendChild(opt);
+      tbody.querySelectorAll('.position-input').forEach(p=> p.addEventListener('input', ()=> autosave()));
+      tbody.querySelectorAll('.count').forEach(inp=>{
+        inp.addEventListener('input', ()=> { if(parseInt(inp.value) < 0) inp.value = 0; autosave(); recalcAll(); });
       });
-    }
-
-    function initQuestionSelectors(){
-      const rows = tbody.querySelectorAll('tr');
-      rows.forEach(row=>{
-        const qSelect = row.querySelector('.question-select');
-        if(!qSelect) return; // monthly rows don't have these selects
-        const pSelect = row.querySelector('.position-select');
-        const editQBtn = row.querySelector('.edit-question');
-        const editPBtn = row.querySelector('.edit-positions');
-
-        populateQuestionSelect(qSelect);
-        qSelect.addEventListener('change', ()=>{
-          populatePositionSelect(pSelect, qSelect.value);
-          save('quiz_questions', questions);
-          save('quiz_positions', positionsMap);
-        });
-
-        editQBtn.addEventListener('click', ()=>{
-          const current = qSelect.value || '';
-          const txt = prompt('اكتب اسم السؤال/الجزء (سيُضاف للقائمة أو يغيّر الاسم الحالي):', current);
-          if(txt === null) return;
-          const name = txt.trim(); if(!name){ alert('الاسم فارغ'); return; }
-          if(!questions.includes(name)) questions.push(name);
-          populateQuestionSelect(qSelect);
-          qSelect.value = name;
-          if(!positionsMap[name]) positionsMap[name] = ["موضع 1","موضع 2"];
-          populatePositionSelect(pSelect, name);
-          save('quiz_questions', questions); save('quiz_positions', positionsMap);
-        });
-
-        editPBtn.addEventListener('click', ()=>{
-          const qName = qSelect.value;
-          if(!qName){ alert('اختر السؤال أولاً أو اضغط ✏️ لإدخال اسم السؤال'); return; }
-          const existing = (positionsMap[qName] || []).join(', ');
-          const input = prompt('أدخل المواضع مفصولة بفاصلة (، أو ,)', existing);
+      // attach pos-edit buttons for parts rows (if any)
+      tbody.querySelectorAll('.edit-positions').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          const row = btn.closest('tr');
+          const existing = row.querySelector('.position-input')?.value || '';
+          const input = prompt('اكتب المواضع مفصولة بفواصل للرجوع إليها لاحقاً (مثال: بداية الآية، منتصف الآية)', existing);
           if(input === null) return;
-          const parts = input.split(/[,،]/).map(s=>s.trim()).filter(Boolean);
-          positionsMap[qName] = parts.length ? parts : ["موضع 1"];
-          populatePositionSelect(pSelect, qName);
-          save('quiz_positions', positionsMap);
-        });
-
-        const selQ = qSelect.value || questions[0];
-        populatePositionSelect(pSelect, selQ);
-      });
-    }
-
-    function initMonthlyInputs(){
-      const rows = tbody.querySelectorAll('tr');
-      rows.forEach(row=>{
-        // for monthly rows we just ensure count inputs react like parts
-        row.querySelectorAll('input.count, input[type="text"], textarea').forEach(inp=>{
-          inp.addEventListener('input', ()=> {
-            // clamp counts
-            if(inp.classList.contains('count') && parseInt(inp.value) < 0) inp.value = 0;
-            recalcAll();
-          });
+          row.querySelector('.position-input').value = input.trim();
+          autosave();
         });
       });
+      // inc/dec buttons via delegation handled below
     }
 
-    // الحسابات
-    function getWeights(){
-      return {
-        tanbih: parseFloat(wTanbih.value) || 0,
-        khata: parseFloat(wKhata.value) || 0,
-        tajweed: parseFloat(wTajweed.value) || 0,
-        lahn: parseFloat(wLahn.value) || 0
-      };
-    }
+    // delegation for inc/dec
+    tbody.addEventListener('click', (e)=>{
+      if(e.target.matches('.inc') || e.target.matches('.dec')){
+        const btn = e.target; const input = btn.parentElement.querySelector('input.count');
+        if(!input) return;
+        const step = parseFloat(input.step) || 1; let val = parseFloat(input.value) || 0;
+        if(btn.classList.contains('inc')) val += step; else val -= step;
+        if(val < parseFloat(input.min || 0)) val = parseFloat(input.min || 0);
+        input.value = Math.round(val * 100) / 100;
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        autosave();
+      }
+    });
 
-    function recalcPartsRow(row){
+    // calculations
+    function getWeights(){ return { tanbih: parseFloat(wTanbih.value)||0, khata: parseFloat(wKhata.value)||0, tajweed: parseFloat(wTajweed.value)||0, lahn: parseFloat(wLahn.value)||0 }; }
+
+    function recalcRow(row){
       const weights = getWeights();
-      let points = 0;
+      let pts=0;
       row.querySelectorAll('input.count').forEach(inp=>{
-        const t = inp.dataset.type;
-        const count = parseInt(inp.value) || 0;
-        if(t && weights[t] !== undefined && count > 0) points += weights[t] * count;
+        const t = inp.dataset.type; const cnt = parseInt(inp.value) || 0;
+        if(t && weights[t] !== undefined && cnt > 0) pts += weights[t] * cnt;
       });
-      row.querySelector('.row-points').textContent = fmt(points);
-      return points;
-    }
-
-    function recalcMonthlyRow(row){
-      // same logic as parts: compute deductions for the question
-      return recalcPartsRow(row);
+      row.querySelector('.row-points').textContent = fmt(pts);
+      return pts;
     }
 
     function determinePassFail(finalPointsValue, maxScore, model){
-      // percent of final relative to maxScore
-      const percent = (maxScore > 0) ? (finalPointsValue / maxScore) * 100 : 0;
-      let pass = true;
+      const percent = (maxScore>0)? (finalPointsValue/maxScore)*100 : 0;
       let threshold = 100;
-      if(model === 'parts'){
-        threshold = (partsCount === 5) ? 97.5 : 95;
-      } else if(model === 'monthly'){
-        threshold = parseFloat(monthlyPassPctEl.value) || 0;
-      }
-      pass = (percent >= threshold);
+      if(model === 'parts') threshold = (partsCount === 5) ? 97.5 : 95;
+      else if(model === 'monthly') threshold = parseFloat(document.getElementById('monthlyPassPct')?.value) || 0;
+      const pass = percent >= threshold;
       return { pass, percent, threshold };
     }
 
     function recalcAll(){
-      if(modelType === 'parts'){
-        const rows = tbody.querySelectorAll('tr');
-        let totalTanbih=0, totalKhata=0, totalTajweed=0, totalLahn=0, totalPoints=0;
-        rows.forEach(r=>{
-          const tan = parseInt(r.querySelector('input[data-type="tanbih"]').value) || 0;
-          const kh = parseInt(r.querySelector('input[data-type="khata"]').value) || 0;
-          const tj = parseInt(r.querySelector('input[data-type="tajweed"]').value) || 0;
-          const ln = parseInt(r.querySelector('input[data-type="lahn"]').value) || 0;
-          totalTanbih += tan; totalKhata += kh; totalTajweed += tj; totalLahn += ln;
-          totalPoints += recalcPartsRow(r);
-        });
-        sumTanbih.textContent = totalTanbih;
-        sumKhata.textContent = totalKhata;
-        sumTajweed.textContent = totalTajweed;
-        sumLahn.textContent = totalLahn;
-        sumPoints.textContent = fmt(totalPoints);
-
-        const maxScore = parseFloat(maxScoreInput.value) || 100;
-        maxScoreDisplay.textContent = maxScore;
-        let final = maxScore - totalPoints; if(final < 0) final = 0;
-        finalScore.textContent = fmt(final);
-
-        const res = determinePassFail(final, maxScore, 'parts');
-        showResultPill(res);
-      } else if(modelType === 'monthly'){
-        const rows = tbody.querySelectorAll('tr');
-        let totalPoints = 0;
-        rows.forEach(r=>{
-          totalPoints += recalcMonthlyRow(r);
-        });
-        sumTanbih.textContent = '-';
-        sumKhata.textContent = '-';
-        sumTajweed.textContent = '-';
-        sumLahn.textContent = '-';
-        sumPoints.textContent = fmt(totalPoints);
-
-        const maxScore = parseFloat(maxScoreInput.value) || 100;
-        maxScoreDisplay.textContent = maxScore;
-        let final = maxScore - totalPoints; if(final < 0) final = 0;
-        finalScore.textContent = fmt(final);
-
-        const res = determinePassFail(final, maxScore, 'monthly');
-        showResultPill(res);
-      }
+      const rows = tbody.querySelectorAll('tr');
+      let totalTan=0,totalKh=0,totalTj=0,totalLn=0,totalPts=0;
+      rows.forEach(r=>{
+        const tan = parseInt(r.querySelector('input[data-type="tanbih"]')?.value) || 0;
+        const kh = parseInt(r.querySelector('input[data-type="khata"]')?.value) || 0;
+        const tj = parseInt(r.querySelector('input[data-type="tajweed"]')?.value) || 0;
+        const ln = parseInt(r.querySelector('input[data-type="lahn"]')?.value) || 0;
+        totalTan += tan; totalKh += kh; totalTj += tj; totalLn += ln;
+        totalPts += recalcRow(r);
+      });
+      sumTanbih.textContent = (modelType==='parts')? totalTan : '-';
+      sumKhata.textContent = (modelType==='parts')? totalKh : '-';
+      sumTajweed.textContent = (modelType==='parts')? totalTj : '-';
+      sumLahn.textContent = (modelType==='parts')? totalLn : '-';
+      sumPoints.textContent = fmt(totalPts);
+      const maxScore = parseFloat(maxScoreInput.value) || 100;
+      maxScoreDisplay.textContent = maxScore;
+      let final = maxScore - totalPts; if(final < 0) final = 0;
+      finalScore.textContent = fmt(final);
+      const res = determinePassFail(final, maxScore, (modelType==='parts')?'parts':'monthly');
+      showResultPill(res);
     }
 
     function showResultPill(res){
-      if(res.pass){
-        resultPill.style.display = 'inline-block';
-        resultPill.classList.remove('fail'); resultPill.classList.add('pass');
-        resultPill.textContent = `النتيجة: ناجح — (${fmt(res.percent)}%)`;
-      } else {
-        resultPill.style.display = 'inline-block';
-        resultPill.classList.remove('pass'); resultPill.classList.add('fail');
-        resultPill.textContent = `النتيجة: راسب — (${fmt(res.percent)}%) — حد النجاح ${res.threshold}%`;
-      }
+      if(res.pass){ resultPill.style.display='inline-block'; resultPill.classList.remove('fail'); resultPill.classList.add('pass'); resultPill.textContent = `النتيجة: ناجح — (${fmt(res.percent)}%)`; }
+      else { resultPill.style.display='inline-block'; resultPill.classList.remove('pass'); resultPill.classList.add('fail'); resultPill.textContent = `النتيجة: راسب — (${fmt(res.percent)}%) — حد النجاح ${res.threshold}%`; }
     }
 
-    // أحداث
-    tbody.addEventListener('input', (e)=>{
-      if(e.target && e.target.classList.contains('count')) {
-        if(parseInt(e.target.value) < 0) e.target.value = 0;
-        recalcAll();
-      } else {
-        // other inputs that affect calculation
-        recalcAll();
+    // autosave
+    function collectState(){
+      const rows = [];
+      tbody.querySelectorAll('tr').forEach(r=>{
+        rows.push({
+          surah: r.querySelector('.surah-input') ? r.querySelector('.surah-input').value : '',
+          pos: r.querySelector('.position-input') ? r.querySelector('.position-input').value : '',
+          tan: r.querySelector('input[data-type="tanbih"]') ? r.querySelector('input[data-type="tanbih"]').value : 0,
+          kh: r.querySelector('input[data-type="khata"]') ? r.querySelector('input[data-type="khata"]').value : 0,
+          tj: r.querySelector('input[data-type="tajweed"]') ? r.querySelector('input[data-type="tajweed"]').value : 0,
+          ln: r.querySelector('input[data-type="lahn"]') ? r.querySelector('input[data-type="lahn"]').value : 0,
+          note: r.querySelector('.notes input') ? r.querySelector('.notes input').value : ''
+        });
+      });
+      return {
+        modelType, partsCount, modelLabel,
+        studentName: studentNameEl.value || '',
+        teacherName: teacherNameEl.value || '',
+        date: dateEl.value || '',
+        maxScore: maxScoreInput.value,
+        weights: { tanbih: wTanbih.value, khata: wKhata.value, tajweed: wTajweed.value, lahn: wLahn.value },
+        rows, timer: { elapsedSeconds, timerRunning }, savedAt: new Date().toISOString()
+      };
+    }
+
+    function autosave(){
+      try{
+        const state = collectState();
+        save(AUTOSAVE_KEY, state);
+        autosaveInfo.textContent = `تم الحفظ تلقائياً: ${new Date(state.savedAt).toLocaleString('ar-EG')}`;
+      }catch(e){ console.error('autosave', e); }
+    }
+
+    function restoreLast(){
+      const state = loadSaved(AUTOSAVE_KEY, null);
+      if(!state) return alert('لا يوجد حفظ تلقائي للاستعادة.');
+      studentNameEl.value = state.studentName || '';
+      teacherNameEl.value = state.teacherName || '';
+      dateEl.value = state.date || new Date().toLocaleDateString('ar-EG');
+      if(state.weights){
+        wTanbih.value = state.weights.tanbih; wKhata.value = state.weights.khata; wTajweed.value = state.weights.tajweed; wLahn.value = state.weights.lahn;
       }
-    });
-
-    [wTanbih,wKhata,wTajweed,wLahn,maxScoreInput, monthlyPassPctEl].forEach(el=>{
-      if(!el) return;
-      el.addEventListener('input', ()=> recalcAll());
-    });
-
-    document.getElementById('recalc').addEventListener('click', ()=> recalcAll());
-
-    document.getElementById('clearAll').addEventListener('click', ()=>{
-      if(!confirm('هل تود إعادة تعيين كل القيم والملاحظات للبدء من جديد؟')) return;
-      if(modelType === 'parts'){
-        tbody.querySelectorAll('input.count').forEach(c=>c.value = 0);
-        tbody.querySelectorAll('input[type="text"]').forEach(t=>t.value = '');
-        tbody.querySelectorAll('.row-points').forEach(r=>r.textContent='0');
-      } else {
-        tbody.querySelectorAll('input.count').forEach(c=>c.value = 0);
-        tbody.querySelectorAll('.monthly-question-text').forEach(t=>t.value = '');
-        tbody.querySelectorAll('.monthly-position').forEach(p=>p.value = '');
-        tbody.querySelectorAll('input[type="text"]').forEach(t=>t.value = '');
-        tbody.querySelectorAll('.row-points').forEach(r=>r.textContent='0');
-      }
+      maxScoreInput.value = state.maxScore || maxScoreInput.value;
+      if(state.modelType === 'monthly') buildMonthlyTable(state.rows.length || 6);
+      else buildPartsTable(state.partsCount || 5);
+      // populate rows
+      const rows = tbody.querySelectorAll('tr');
+      (state.rows || []).forEach((rdata,i)=>{
+        const r = rows[i];
+        if(!r) return;
+        if(r.querySelector('.surah-input')) r.querySelector('.surah-input').value = rdata.surah || '';
+        if(r.querySelector('.position-input')) r.querySelector('.position-input').value = rdata.pos || '';
+        if(r.querySelector('input[data-type="tanbih"]')) r.querySelector('input[data-type="tanbih"]').value = rdata.tan || 0;
+        if(r.querySelector('input[data-type="khata"]')) r.querySelector('input[data-type="khata"]').value = rdata.kh || 0;
+        if(r.querySelector('input[data-type="tajweed"]')) r.querySelector('input[data-type="tajweed"]').value = rdata.tj || 0;
+        if(r.querySelector('input[data-type="lahn"]')) r.querySelector('input[data-type="lahn"]').value = rdata.ln || 0;
+        if(r.querySelector('.notes input')) r.querySelector('.notes input').value = rdata.note || '';
+      });
+      elapsedSeconds = state.timer ? state.timer.elapsedSeconds || 0 : 0;
       recalcAll();
-    });
+      autosaveInfo.textContent = `تم استعادة آخر حفظ: ${state.savedAt ? new Date(state.savedAt).toLocaleString('ar-EG') : ''}`;
+    }
 
-    resetSavedBtn.addEventListener('click', ()=>{
-      if(!confirm('سيتم حذف الأسئلة والمواضع المحفوظة محلياً. تابع؟')) return;
-      localStorage.removeItem('quiz_questions');
-      localStorage.removeItem('quiz_positions');
-      location.reload();
-    });
+    // timer functions
+    function updateTimerDisplay(){ timerDisplay.textContent = fmtDuration(elapsedSeconds); }
+    function startTimerInternal(){
+      if(timerInterval) clearInterval(timerInterval);
+      timerRunning = true; timerStartTimestamp = Date.now();
+      timerInterval = setInterval(()=>{ elapsedSeconds += 1; updateTimerDisplay(); }, 1000);
+      updateTimerDisplay();
+    }
+    function pauseTimerInternal(){
+      if(timerInterval) clearInterval(timerInterval); timerInterval = null; timerRunning = false; timerStartTimestamp = null; updateTimerDisplay();
+    }
+    function stopTimerInternal(){ if(timerInterval) clearInterval(timerInterval); timerInterval = null; timerRunning=false; timerStartTimestamp=null; updateTimerDisplay(); }
 
-    // التبديل بين النماذج
-    btn5.addEventListener('click', ()=> { buildPartsTable(5); });
-    btn10.addEventListener('click', ()=> { buildPartsTable(10); });
-    btnMonthly.addEventListener('click', ()=> {
-      monthlySettings.style.display = 'block';
-      // build monthly using count value
-      buildMonthlyTable(parseInt(monthlyCountEl.value) || 6);
-    });
+    timerStartBtn.addEventListener('click', ()=>{ if(timerRunning) return alert('المؤقِّت يعمل'); elapsedSeconds = 0; startTimerInternal(); autosave(); });
+    timerPauseBtn.addEventListener('click', ()=>{ if(!timerRunning) return alert('المؤقِّت متوقف'); pauseTimerInternal(); autosave(); });
+    timerResumeBtn.addEventListener('click', ()=>{ if(timerRunning) return alert('المؤقِّت يعمل'); startTimerInternal(); autosave(); });
+    timerStopBtn.addEventListener('click', ()=>{ if(!confirm('إيقاف نهائي للمؤقِّت؟')) return; pauseTimerInternal(); autosave(); });
 
-    buildMonthlyBtn.addEventListener('click', ()=>{
-      const n = parseInt(monthlyCountEl.value) || 1;
-      buildMonthlyTable(n);
-    });
-
-    // التصدير CSV مع BOM، واسم الطالب أولاً ثم اسم المعلم، وإضافة حالة النجاح/الرسوب
-    document.getElementById('exportCsv').addEventListener('click', ()=>{
-      recalcAll();
+    // CSV export
+    function exportCSV(){
+      recalcAll(); autosave();
       const out = [];
       const student = studentNameEl.value || '---';
       const teacher = teacherNameEl.value || '---';
-      const date = document.getElementById('date').value || '---';
-      let resultText = '---', resultPercent = '0';
-      if(modelType === 'parts'){
-        const maxScore = parseFloat(maxScoreInput.value) || 100;
-        const finals = parseFloat(finalScore.textContent) || 0;
-        const res = determinePassFail(finals, maxScore, 'parts');
-        resultText = res.pass ? 'ناجح' : 'راسب'; resultPercent = fmt(res.percent);
-      } else {
-        const finals = parseFloat(finalScore.textContent) || 0;
-        const maxScore = parseFloat(maxScoreInput.value) || 100;
-        const res = determinePassFail(finals, maxScore, 'monthly');
-        resultText = res.pass ? 'ناجح' : 'راسب'; resultPercent = fmt(res.percent);
-      }
-
-      // header info: student first, then teacher
+      const date = dateEl.value || new Date().toLocaleDateString('ar-EG');
+      const maxScore = parseFloat(maxScoreInput.value) || 100;
+      const final = parseFloat(finalScore.textContent) || 0;
+      const res = determinePassFail(final, maxScore, modelType === 'parts' ? 'parts' : 'monthly');
+      const resultText = res.pass ? 'ناجح' : 'راسب';
+      const resultPercent = fmt(res.percent);
       out.push(['اسم_الطالب', student, 'اسم_المعلم', teacher, 'التاريخ', date]);
       out.push(['نوع_النموذج', modelLabel]);
       out.push(['النتيجة', resultText, 'النسبة_%', resultPercent]);
       out.push([]);
 
       if(modelType === 'parts'){
-        const headers = ['الجزء','السؤال','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة'];
-        out.push(headers);
-        const rows = tbody.querySelectorAll('tr');
-        rows.forEach(r=>{
+        out.push(['الجزء','السورة','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة']);
+        tbody.querySelectorAll('tr').forEach(r=>{
           const part = r.dataset.row || '';
-          const q = r.querySelector('.question-select') ? r.querySelector('.question-select').value : '';
-          const pos = r.querySelector('.position-select') ? r.querySelector('.position-select').value : '';
+          const q = r.querySelector('.surah-input') ? r.querySelector('.surah-input').value : '';
+          const pos = r.querySelector('.position-input') ? r.querySelector('.position-input').value : '';
           const t = r.querySelector('input[data-type="tanbih"]').value || '0';
           const k = r.querySelector('input[data-type="khata"]').value || '0';
           const tj = r.querySelector('input[data-type="tajweed"]').value || '0';
@@ -703,75 +548,79 @@
           const pts = r.querySelector('.row-points').textContent;
           out.push([part,q,pos,t,k,tj,l,note,pts]);
         });
-        out.push([]);
-        out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
+        out.push([]); out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
         out.push(['','', '', sumTanbih.textContent, sumKhata.textContent, sumTajweed.textContent, sumLahn.textContent, '', sumPoints.textContent]);
         out.push(['الدرجة_النهائية', finalScore.textContent + ' / ' + maxScoreInput.value]);
       } else {
-        const headers = ['رقم','نص_السؤال','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة'];
-        out.push(headers);
-        const rows = tbody.querySelectorAll('tr');
-        rows.forEach(r=>{
+        out.push(['رقم','السورة_المختارة','الموضع','تنبيه_مرات','خطأ_مرات','تجويد_مرات','لحن_مرات','ملاحظات','نقاط_مخصومة']);
+        tbody.querySelectorAll('tr').forEach(r=>{
           const idx = r.dataset.row || '';
-          const qtext = r.querySelector('.monthly-question-text') ? r.querySelector('.monthly-question-text').value.replace(/"/g,'""') : '';
-          const pos = r.querySelector('.monthly-position') ? r.querySelector('.monthly-position').value.replace(/"/g,'""') : '';
+          const sur = r.querySelector('.surah-input') ? r.querySelector('.surah-input').value.replace(/"/g,'""') : '';
+          const pos = r.querySelector('.position-input') ? r.querySelector('.position-input').value.replace(/"/g,'""') : '';
           const t = r.querySelector('input[data-type="tanbih"]').value || '0';
           const k = r.querySelector('input[data-type="khata"]').value || '0';
           const tj = r.querySelector('input[data-type="tajweed"]').value || '0';
           const l = r.querySelector('input[data-type="lahn"]').value || '0';
           const note = r.querySelector('.notes input').value.replace(/"/g,'""');
           const pts = r.querySelector('.row-points').textContent;
-          out.push([idx, qtext, pos, t,k,tj,l,note,pts]);
+          out.push([idx,sur,pos,t,k,tj,l,note,pts]);
         });
-        out.push([]);
-        out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
+        out.push([]); out.push(['','الاجماليات','','إجمالي_تنبيهات','إجمالي_أخطاء','إجمالي_تجويد','إجمالي_لحن','','مجموع_النقاط']);
         out.push(['','', '', sumTanbih.textContent, sumKhata.textContent, sumTajweed.textContent, sumLahn.textContent, '', sumPoints.textContent]);
         out.push(['الدرجة_النهائية', finalScore.textContent + ' / ' + maxScoreInput.value]);
-        out.push(['نسبة_النجاح_المحددة', monthlyPassPctEl.value || '']);
       }
 
-      // بناء CSV مع BOM لتوافق Excel
       const sep = ',';
-      const csv = out.map(r=>{
-        return r.map(cell=>{
-          if(cell===undefined || cell===null) return '';
-          const s = String(cell);
-          if(s.includes(sep) || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
-          return s;
-        }).join(sep);
-      }).join('\n');
+      const csv = out.map(r => r.map(cell=>{
+        if(cell===undefined||cell===null) return '';
+        const s = String(cell);
+        if(s.includes(sep) || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
+        return s;
+      }).join(sep)).join('\n');
 
       const csvWithBOM = '\uFEFF' + csv;
       const blob = new Blob([csvWithBOM], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement('a'); a.href = url;
       const fileSuffix = modelLabel.replace(/\s+/g,'_');
-      a.href = url;
-      a.download = (student ? student.replace(/\s+/g,'_') : 'student') + `_${fileSuffix}_results.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      a.download = (student.replace(/\s+/g,'_') || 'student') + `_${fileSuffix}_results.csv`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    // event wiring
+    document.getElementById('date').value = new Date().toLocaleDateString('ar-EG');
+    recalcBtn.addEventListener('click', ()=> recalcAll());
+    clearAllBtn.addEventListener('click', ()=>{
+      if(!confirm('هل تود إعادة تعيين كل القيم؟')) return;
+      tbody.querySelectorAll('input.count').forEach(c=>c.value=0);
+      tbody.querySelectorAll('input[type="text"]').forEach(t=>t.value='');
+      tbody.querySelectorAll('textarea').forEach(t=>t.value='');
+      tbody.querySelectorAll('.row-points').forEach(r=>r.textContent='0');
+      recalcAll(); autosave();
     });
+    exportCsvBtn.addEventListener('click', ()=> exportCSV());
+    resetSavedBtn.addEventListener('click', ()=> { if(!confirm('مسح البيانات المحفوظة محلياً؟')) return; localStorage.removeItem(AUTOSAVE_KEY); localStorage.removeItem('quiz_questions'); localStorage.removeItem('quiz_positions'); location.reload(); });
+    restoreLastBtn.addEventListener('click', ()=> restoreLast());
+    btn5.addEventListener('click', ()=> buildPartsTable(5));
+    btn10.addEventListener('click', ()=> buildPartsTable(10));
+    btnMonthly.addEventListener('click', ()=> { const c = parseInt(document.getElementById('monthlyCount')?.value || 6); buildMonthlyTable(c); });
 
-    // bootstrap initial
+    document.addEventListener('input', (e)=> { if(e.target && (e.target.matches('input') || e.target.matches('textarea') || e.target.matches('select'))){ recalcAll(); autosave(); } });
+
+    // timer
+    timerStartBtn.addEventListener('click', ()=> { if(timerRunning) return alert('المؤقِّت يعمل'); elapsedSeconds = 0; if(timerInterval) clearInterval(timerInterval); startTimerInternal(); autosave(); });
+    timerPauseBtn.addEventListener('click', ()=> { if(!timerRunning) return alert('المؤقِّت متوقف'); pauseTimerInternal(); autosave(); });
+    timerResumeBtn.addEventListener('click', ()=> { if(timerRunning) return alert('المؤقِّت يعمل'); startTimerInternal(); autosave(); });
+    timerStopBtn.addEventListener('click', ()=> { if(!confirm('إيقاف نهائي للمؤقِّت؟')) return; pauseTimerInternal(); autosave(); });
+
+    // initial bootstrap
     (function bootstrap(){
-      // ensure positions exist for questions
-      questions.forEach(q=>{
-        if(!positionsMap[q]) positionsMap[q] = DEFAULT_POSITIONS[q] || ["موضع 1"];
-      });
-      save('quiz_questions', questions);
-      save('quiz_positions', positionsMap);
-
-      // default build 5 parts (or read from URL ?parts=10)
-      const urlParams = new URLSearchParams(location.search);
-      const p = parseInt(urlParams.get('parts')) || 5;
-      buildPartsTable((p === 10) ? 10 : 5);
-
-      // save last teacher optionally
-      const lastTeacher = loadSaved('last_teacher', '');
-      if(lastTeacher) teacherNameEl.value = lastTeacher;
-      teacherNameEl.addEventListener('input', ()=> save('last_teacher', teacherNameEl.value));
+      populateSurahDatalist();
+      buildPartsTable(5);
+      const saved = loadSaved(AUTOSAVE_KEY, null);
+      if(saved && saved.savedAt) autosaveInfo.textContent = `آخر حفظ تلقائي: ${new Date(saved.savedAt).toLocaleString('ar-EG')}`;
+      recalcAll();
+      window.addEventListener('beforeunload', ()=> autosave());
     })();
   </script>
 </body>
